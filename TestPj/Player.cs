@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Design;
 using System.Text.Json;
 using static System.Console;
 class PlayerData
@@ -8,7 +9,9 @@ class PlayerData
     public int Exp { get; set; }
     public int Lv{ get; set; }
     public int Posion{ get; set; }
-    public int Creadit {  get; set; }
+    public int Credit {  get; set; }
+    public int Weapon_Number { get; set; }
+    public int[] ItemInventory {get; set;}
 }   // json데이터파일을 저장하기위한 클래스
 class Player
 {
@@ -23,9 +26,12 @@ class Player
     public int p_MaxExp = 10;           // 다음 레벨로 가기위한 최대 경험치
     public int p_Exp;                  // 플레이어의 현재 가지고 있는 경험치를 저장할 변수
     private bool wearing_Weapon = false;
+    public int weapon_Number;
     private Weapon weapon;              // 현재 무기종류
+    public Weapon Weapon { get; set; }
     public Inventory inventory;
     public int credit = 0;
+    public int[] itemInventory;
     public string GetName { get { return p_Name; } }    // 이름을 보기위한 프로퍼티
     public int Lv
     {
@@ -52,19 +58,19 @@ class Player
         this._Lv = 1;
     } // 새로 생성되는 데이터를 저장하는 생성자
     public Player(string name, int p_MaxExp, int p_Exp, 
-                     int Lv, int posion, int creadit)
+                     int Lv, int posion, int creadit, int weapon_Number, int[] itemInventory)
     {
         if (Lv != 1)
         {
             this.attack_damage = 5 + (2 * (Lv - 1));
             this.p_MaxHp = 50 + (10 * (Lv - 1));
-            this.p_MaxMp = 10 + (5 * (Lv - 1));
+            this.p_MaxMp = 20 + (5 * (Lv - 1));
         }
         else
         {
             this.attack_damage = 5;
             this.p_MaxHp = 50;
-            this.p_MaxMp = 10;
+            this.p_MaxMp = 20;
         }
         this.p_Name = name;
         this.p_Hp = p_MaxHp;
@@ -74,6 +80,8 @@ class Player
         this.p_Exp = p_Exp;
         this._Lv = Lv;
         this.credit = creadit;
+        this.weapon_Number = weapon_Number;
+        this.itemInventory = itemInventory;
     } // 세이브된 데이터를 로드하기위한 생성자
     public void ShowInfo()
     {
@@ -96,17 +104,23 @@ class Player
     }   // 플레이어의 정보를 출력하는 메소드
     public void WearingWeapon(Weapon weapon)
     {
-        if (wearing_Weapon == false)
+        if (weapon != null)
         {
-            this.attack_damage = this.attack_damage + weapon.damage;
-            this.weapon = weapon;
+            if (wearing_Weapon == false)
+            {
+                this.attack_damage = this.attack_damage + weapon.damage;
+                this.weapon = weapon;
+                this.weapon_Number = weapon.itemNumber;
+
+            }
+            else
+            {
+                this.attack_damage = this.attack_damage - this.weapon.damage + weapon.damage;
+                this.weapon = weapon;
+                this.weapon_Number = weapon.itemNumber;
+            }
+            wearing_Weapon = true;
         }
-        else
-        {
-            this.attack_damage = this.attack_damage -this.weapon.damage + weapon.damage;
-            this.weapon = weapon;
-        }
-        wearing_Weapon = true;
     } // 무기 착용여부를 확인하는 메소드
     public void Dead()
     {
@@ -138,16 +152,30 @@ class Player
             {
                 if (player.weapon.damage < weaponList[randDrop - 1].damage)
                 {
-                    Write("장착중인 아이템이 자동판매 되었습니다. : ");
-                    player.credit += player.weapon.sell_Price;
-                    WriteLine($"{player.weapon.sell_Price}크레딧을 획득하셨습니다");
-                    WearingWeapon(weaponList[randDrop - 1]);
+                    if (inventory.weapons.Count >= 20)
+                    {
+                        Write("장착중인 아이템이 자동판매 되었습니다. : ");
+                        player.credit += player.weapon.sell_Price;
+                        WriteLine($"{player.weapon.sell_Price}크레딧을 획득하셨습니다");
+                        WearingWeapon(weaponList[randDrop - 1]);
+                    }
+                    else
+                    {
+                        inventory.weapons.Add(weapon);
+                    }
                 }
                 else 
                 {
-                    Write("획득한 아이템을 판매합니다. : ");
-                    player.credit += weaponList[randDrop - 1].sell_Price;
-                    WriteLine($"{weaponList[randDrop - 1].sell_Price} 크레딧을 획득하셨습니다");
+                    if (inventory.weapons.Count >= 20)
+                    {
+                        Write("획득한 아이템을 판매합니다. : ");
+                        player.credit += weaponList[randDrop - 1].sell_Price;
+                        WriteLine($"{weaponList[randDrop - 1].sell_Price} 크레딧을 획득하셨습니다");
+                    }
+                    else
+                    {
+                        inventory.weapons.Add(weaponList[randDrop - 1]);
+                    }
                 }
             }
 
@@ -189,23 +217,109 @@ class Player
         }
         
     }
-    public void SkillActive(Weapon weapon)
+    public float SkillActive(Weapon weapon)
     {
-        if(weapon == null)
+        int input;
+        while (weapon.item_Name != null&&this.p_Mp > 20)
         {
-            WriteLine("장착한 무기가 없어서 사용할 수 없습니다.");
-            return;
+            Write("사용할 스킬을 선택하세요 ");
+            if (weapon.weapon_Type == "검")
+            {
+                WriteLine("1. 회전베기, 2. 더블어택");
+                input = int.Parse(ReadLine());
+                if (input == 1)
+                {
+                    Write("회전베기!!! ");
+                    this.p_Mp -= 20;
+                    return 1.5f;
+                }
+                else if (input == 2)
+                {
+                    if (p_Mp > 30)
+                    {
+                        Write("더블어택!!! ");
+                        this.p_Mp -= 30;
+                        return 2;
+                    }
+                    else
+                    {
+                        WriteLine("마나가 부족합니다.");
+                    }
+                }
+                else
+                {
+                    WriteLine("잘못 입력했습니다");
+                    continue;
+                }
+            }
+            else if (weapon.weapon_Type == "스태프")
+            {
+                WriteLine("1. 블레이즈 2. 아이스애로우  3. 메테오");
+                input = int.Parse(ReadLine());
+                if (input == 1)
+                {
+                    Write("블레이즈!!! ");
+                    this.p_Mp -= 20;
+                    return 1.5f;
+                }
+                else if (input == 2)
+                {
+                    if (p_Mp > 20)
+                    {
+                        Write("아이스애로우!!! ");
+                        this.p_Mp -= 30;
+                        return 1.8f;
+                    }
+                    else
+                    {
+                        WriteLine("마나가 부족합니다.");
+                    }
+                }
+                else if (input == 3)
+                {
+                    if(p_Mp > 60)
+                    {
+                        this.p_Mp -= 60;
+                        return 3.5f;
+                    }
+                }
+                else
+                {
+                    WriteLine("잘못 입력했습니다");
+                    continue;
+                }
+                return 2.5f;
+            } else if (weapon.weapon_Type == "활")
+            {
+                WriteLine("1. 더블 샷, 2. 매그넘 샷");
+                input = int.Parse(ReadLine());
+                if (input == 1)
+                {
+                    Write("더블 샷!!! ");
+                    this.p_Mp -= 20;
+                    return 1.5f;
+                }
+                else if (input == 2)
+                {
+                    if (p_Mp > 40)
+                    {
+                        Write("매그넘 샷!!! ");
+                        this.p_Mp -= 30;
+                        return 2.5f;
+                    }
+                    else
+                    {
+                        WriteLine("마나가 부족합니다.");
+                    }
+                }
+                else
+                {
+                    WriteLine("잘못 입력했습니다");
+                    continue;
+                }
+            }
         }
-        if(weapon.weapon_Type == "검")
-        {
-
-        }
-        else if (weapon.weapon_Type == "스태프")
-        {
-            
-        }else if(weapon.weapon_Type == "활")
-        {
-
-        }
+        WriteLine("장착한 무기가 없어서 사용할 수 없습니다.");
+        return 0;
     }// 무기에 따라 사용될 다양한 스킬을 저장하는 메소드
 }

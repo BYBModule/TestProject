@@ -7,17 +7,37 @@ using System.Threading.Tasks;
 class Inventory
 {
     public static int itemCount = 0;
-    public static int itemMaxCount = 20;
-    public List<Weapon> weapons;
+    public List<Weapon> weapons = new List<Weapon>();
     public Inventory()
     {
     }
+    public int[] GetInventory()
+    {
+        int[] result = new int[weapons.Count];
+        for (int i = 0; i < weapons.Count; i++)
+        {
+            result[i] = weapons[i].itemNumber;
+        }
+        return result;
+    }
+    public void SetInventory()
+    {
 
+    }
     public void InventoryInfo()
     {
         if (weapons != null)
         {
-            Console.WriteLine("현재 인벤토리는 {0}칸 남았습니다.", 20 - weapons.Count);
+            for(int i = 0; i < weapons.Count; i++)
+            {
+                Console.Write("■");
+                if(i != 0&&i%5 == 0)
+                {
+                    Console.WriteLine();
+                }
+                itemCount++;
+            }
+            Console.WriteLine("현재 인벤토리는 {0}칸 남았습니다.", 20 - itemCount);
             while (true)
             {
                 Console.Write("몇번칸을 확인 하겠습니까? : ");
@@ -26,13 +46,14 @@ class Inventory
                     if (index > 0 && index < 20)
                     {
 
-                        if (weapons[index - 1] != null)
+                        if (index <= itemCount)
                         {
                             weapons[index - 1].WeaponDataInfo();
                         }
                         else
                         {
                             Console.WriteLine("아이템이 존재하지 않습니다.");
+                            continue;
                         }
 
                     }
@@ -51,6 +72,7 @@ class Inventory
                 {
                 }
             }
+            itemCount = 0;
         }
         else
         {

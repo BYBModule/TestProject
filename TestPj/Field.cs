@@ -22,6 +22,7 @@ class Field : Enemy
     {
         Random critical = new Random();
         int value;
+        float skillDamage;
         WriteLine("------------------------------------------------------------------------");
         enemy.showInfo();
         WriteLine("------------------------------------------------------------------------");
@@ -32,7 +33,7 @@ class Field : Enemy
             {
                 player.ShowInfo();
                 WriteLine("------------------------------------------------------------------------");
-                Write("1.공격 2.회복 3.후퇴 : ");
+                Write("1.공격 2.회복 3.스킬사용 4. 도망 : ");
                 if (int.TryParse(ReadLine(), out value))
                 {
                     WriteLine("\n------------------------------------------------------------------------");
@@ -76,6 +77,37 @@ class Field : Enemy
                         }
                     }
                     else if (value == 3)
+                    {
+                        if (player.p_Mp > 20)
+                        {
+                            skillDamage = player.SkillActive(player.Weapon);
+                            if (skillDamage > 0)
+                            {
+                                if (10 > critical.Next(0, 100))
+                                {
+                                    WriteLine("치명타 발생!");
+                                    enemy.e_Hp = enemy.e_Hp - (int)(player.attack_damage * 2 * skillDamage);
+                                    WriteLine("{0}의 데미지를 입혔습니다.", (int)(player.attack_damage * 2 * skillDamage));
+                                }
+                                else
+                                {
+                                    enemy.e_Hp = enemy.e_Hp - player.attack_damage;
+                                    WriteLine("{0}의 데미지를 입혔습니다.",  (int)(player.attack_damage * skillDamage));
+                                }
+                            }
+                            else
+                            {
+                                WriteLine("스킬사용이 취소되었습니다.");
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            WriteLine("마나가 부족합니다.");
+                            continue;
+                        }
+                    }
+                    else if (value == 4)
                     {
                         enemy.e_Hp = enemy.e_MaxHp;
                         enemy.e_Mp = enemy.e_MaxMp;
@@ -126,6 +158,7 @@ class Field : Enemy
                     WriteLine("전투에서 승리했습니다.\n");
                     WriteLine("------------------------------------------------------------------------");
                     player.Reward(enemy, player, weaponList);
+                    player.p_Mp = player.p_MaxMp;
                     enemy.e_Hp = enemy.e_MaxHp;
                     enemy.e_Mp = enemy.e_MaxMp;
                     turn = true;
@@ -198,57 +231,10 @@ class Field : Enemy
     }
     public void Ingame(List<Enemy> e_List)
     {
+
         StreamReader DropTable = new StreamReader("./DropTable.json");
         StreamReader iD = new StreamReader("./WeaponType.json");
-        StreamReader pd = new StreamReader("./PlayerSave.json"); // 플레이어 로드
-        string readPData = pd.ReadToEnd();
-        pd.Close();
-        List<PlayerData> playerData = new List<PlayerData>();
-        playerData = JsonSerializer.Deserialize<List<PlayerData>>(readPData);
-        Player player = new Player();
-        int inputnum;
-        while (true) 
-        {
-            Write("플레이어 아이디를 입력해주세요 : ");
-            string input = ReadLine();
-            for (int i = 0; i < playerData.Count; i++)
-            {
-                if (input == playerData[i].Name)
-                {
-                    WriteLine("저장된 정보를 로드합니다.");
-                    player = new Player(playerData[i].Name, playerData[i].MaxExp, playerData[i].Exp, playerData[i].Lv,
-                                        playerData[i].Posion, playerData[i].Creadit);
-                    break;
-                }
-            }
-            if(player.GetName == null)
-            {
-                Write("해당 이름으로 아이디를 만드시겠습니까? 1. 예 2. 아니오 : ");
-                if(int.TryParse(ReadLine(), out inputnum))
-                {
-                    if(inputnum == 1)
-                    {
-                        player = new Player(input);
-                        break;
-                    }
-                    else if(inputnum == 2)
-                    {
-                        continue;
-                    }
-
-                }
-                else
-                {
-                    Write("잘못입력했습니다. 처음으로 돌아갑니다.");
-                    continue;
-                }
-                
-            }else if (player.GetName != null)
-            {
-                break;
-            }
-        }
-    
+        StreamReader pd = new StreamReader("./PlayerSave1.json"); // 플레이어 로드
         List<WeaponData> weaponData = new List<WeaponData>();
         List<Weapon> weaponList = new List<Weapon>();
         string readItemData = iD.ReadToEnd();
@@ -256,7 +242,7 @@ class Field : Enemy
 
         for (int i = 0; i < weaponData.Count; i++)
         {
-            weaponList.Add(new Weapon(weaponData[i].Damage, weaponData[i].Weapon_Type, weaponData[i].Item_Name, weaponData[i].Sell_Price, weaponData[i].ItemNumber));
+            weaponList.Add(new Weapon(weaponData[i].Damage, weaponData[i].Weapon_Type, weaponData[i].Item_Name, weaponData[i].Sell_Price, weaponData[i].Item_Number));
         }
         List<DropTable> drop = new List<DropTable>();
         readItemData = DropTable.ReadToEnd();
@@ -295,11 +281,68 @@ class Field : Enemy
                 else if (seaList[j].e_Name == drop[i].enemy_Name)
                 {
                     seaList[j].droptable = drop[i];
-                }else if (caveList[j].e_Name == drop[i].enemy_Name)
+                }
+                else if (caveList[j].e_Name == drop[i].enemy_Name)
                 {
                     caveList[j].droptable = drop[i];
                 }
             }
+        }
+        List<PlayerData> playerData = new List<PlayerData>();
+        string readPData = pd.ReadToEnd();
+        pd.Close();
+        playerData = JsonSerializer.Deserialize<List<PlayerData>>(readPData);
+        Player player = new Player();
+        int inputnum;
+        while (true) 
+        {
+            Write("플레이어 아이디를 입력해주세요 : ");
+            string input = ReadLine();
+            for (int i = 0; i < playerData.Count; i++)
+            {
+                if (input == playerData[i].Name)
+                {
+                    WriteLine("저장된 정보를 로드합니다.");
+                    player = new Player(playerData[i].Name, playerData[i].MaxExp, playerData[i].Exp, playerData[i].Lv,
+                                        playerData[i].Posion, playerData[i].Credit, playerData[i].Weapon_Number, playerData[i].ItemInventory);
+                    if (player.weapon_Number != 0)
+                    {
+                        player.WearingWeapon(weaponList[playerData[i].Weapon_Number]);
+                    }
+                    break;
+                }
+            }
+            if(player.GetName == null)
+            {
+                Write("해당 이름으로 아이디를 만드시겠습니까? 1. 예 2. 아니오 : ");
+                if(int.TryParse(ReadLine(), out inputnum))
+                {
+                    if(inputnum == 1)
+                    {
+                        player = new Player(input);
+                        break;
+                    }
+                    else if(inputnum == 2)
+                    {
+                        continue;
+                    }
+
+                }
+                else
+                {
+                    Write("잘못입력했습니다. 처음으로 돌아갑니다.");
+                    continue;
+                }
+                
+            }else if (player.GetName != null)
+            {
+                break;
+            }
+        }
+        player.inventory = new Inventory();
+        for (int i = 0; i < player.itemInventory.Length; i++)
+        {
+            player.inventory.weapons.Add(weaponList[player.itemInventory[i] - 1]);
         }
         int lotation = 0;
         WriteLine("------------------------------------------------------------------------");
@@ -344,7 +387,7 @@ class Field : Enemy
                 }
                 else if (lotation == 6)
                 {
-                    StreamWriter sw = new StreamWriter("./PlayerSave.json", false);
+                    StreamWriter sw = new StreamWriter("./PlayerSave1.json", false);
                     bool playerSave = false;
                     for (int i = 0; i < playerData.Count; i++)
                     {
@@ -355,7 +398,9 @@ class Field : Enemy
                             playerData[i].Exp = player.p_Exp;
                             playerData[i].Lv = player.Lv;
                             playerData[i].Posion = player.posion;
-                            playerData[i].Creadit = player.credit;
+                            playerData[i].Credit = player.credit;
+                            playerData[i].Weapon_Number = player.weapon_Number;
+                            playerData[i].ItemInventory = player.inventory.GetInventory();
                             playerSave = true;
                         }
                     }
@@ -367,7 +412,9 @@ class Field : Enemy
                         playerData[playerData.Count - 1].Exp = player.p_Exp;
                         playerData[playerData.Count - 1].Lv = player.Lv;
                         playerData[playerData.Count - 1].Posion = player.posion;
-                        playerData[playerData.Count - 1].Creadit = player.credit;
+                        playerData[playerData.Count - 1].Credit = player.credit;
+                        playerData[playerData.Count - 1].Weapon_Number = player.weapon_Number;
+                        playerData[playerData.Count - 1].ItemInventory = player.inventory.GetInventory();
                         playerSave = true;
                     }    
 

@@ -9,7 +9,7 @@ class WeaponData
     public string Weapon_Type { get; set; }         // 아이템 타입
     public string Item_Name { get; set; }           // 아이템 이름
     public int Sell_Price { get; set; }             // 판매가격
-    public int ItemNumber { get; set; }             // 아이템 고유번호
+    public int Item_Number { get; set; }            // 아이템 고유번호
 }
 class Weapon
 {
@@ -23,7 +23,7 @@ class Weapon
     {
         this.damage = 0;
         this.weapon_Type = "";
-        this.item_Name = "";
+        this.item_Name = null;
         this.sell_Price = 0;
         this.itemNumber = 0;
     }
