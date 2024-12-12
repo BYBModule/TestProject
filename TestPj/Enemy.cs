@@ -38,25 +38,6 @@ class Enemy
         this.e_Mp = e_MaxMp;
         this.e_Exp = e_Exp;
     }
-    //public void SetDateEnemy(Enemy LocalEnemies ,int value)
-    //{
-    //    if (f_Name == "초원")
-    //    {
-
-    //    }
-    //    else if (f_Name == "바다")
-    //    {
-    //        LocalEnemies[0] = new Enemy(10, "어인", 50, 0, 10, "바다");
-    //        LocalEnemies[1] = new Enemy(15, "세이렌", 100, 0, 20, "바다");
-    //        LocalEnemies[2] = new Enemy(40, "크라켄", 500, 50, 200, "바다");
-    //    }
-    //    else if (f_Name == "동굴")
-    //    {
-    //        LocalEnemies[0] = new Enemy(3, "동굴박쥐", 15, 0, 4, "동굴");
-    //        LocalEnemies[1] = new Enemy(17, "웜", 80, 0, 12, "동굴");
-    //        LocalEnemies[2] = new Enemy(20, "고블린 무리", 300, 0, 80, "동굴");
-    //    }
-    //}
     public void showInfo()
     {
         WriteLine("Damage : {0}\nName : {1}\nHp : {2}/{3}\nMp : {4}/{5}\nExp : {6}\n필드 : {7}", this.damage, this.e_Name, this.e_Hp,

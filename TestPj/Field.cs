@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static System.Console;
 class Field : Enemy
@@ -76,6 +77,8 @@ class Field : Enemy
                     }
                     else if (value == 3)
                     {
+                        enemy.e_Hp = enemy.e_MaxHp;
+                        enemy.e_Mp = enemy.e_MaxMp;
                         WriteLine("전투에서 도망쳤습니다.");
                         WriteLine("------------------------------------------------------------------------");
                         return;
@@ -126,6 +129,7 @@ class Field : Enemy
                     enemy.e_Hp = enemy.e_MaxHp;
                     enemy.e_Mp = enemy.e_MaxMp;
                     turn = true;
+                    WriteLine("------------------------------------------------------------------------");
                     return;
                 }
                 else
@@ -136,6 +140,7 @@ class Field : Enemy
                     enemy.e_Mp = enemy.e_MaxMp;
                     player.Dead();
                     turn = true;
+                    WriteLine("------------------------------------------------------------------------");
                     return;
                 }
             }
@@ -147,10 +152,11 @@ class Field : Enemy
         int state;
         player.p_Hp = player.p_MaxHp;
         player.p_Mp = player.p_MaxMp;
-        Write("플레이어 체력이 회복되었습니다.");
+        WriteLine("플레이어 체력이 회복되었습니다.");
+        WriteLine("------------------------------------------------------------------------");
         while (true)
         {
-            WriteLine("하고자 하는 행동을 선택해주세요 1. 지역이동, 2.포션구입(포션의 가격은 {0}원 입니다.)", (5 * (player.Lv + 1)));
+            WriteLine("하고자 하는 행동을 선택해주세요 1. 지역이동, 2. 포션구입(포션의 가격은 {0}원 입니다.)", (20 * (player.Lv + 1)));
             if (int.TryParse(ReadLine(), out state))
             {
 
@@ -161,11 +167,11 @@ class Field : Enemy
                 else if (state == 2 && player.posion < (10 + player.Lv))
                 {
                     // 포션구입
-                    if (5 * (player.Lv + 1) < player.credit)
+                    if (20 * (player.Lv + 1) < player.credit)
                     {
                         WriteLine("포션을 구입했습니다.");
                         player.posion = player.posion + 1;
-                        player.credit = player.credit - (5 * (player.Lv + 1));
+                        player.credit = player.credit - (20 * (player.Lv + 1));
                         WriteLine("포션은 최대 {0}개 가질 수 있습니다.", (10 + player.Lv) - 1);
                         player.ShowInfo();
                     }
@@ -194,14 +200,55 @@ class Field : Enemy
     {
         StreamReader DropTable = new StreamReader("./DropTable.json");
         StreamReader iD = new StreamReader("./WeaponType.json");
-        StreamReader pd = new StreamReader("./PlayerData.json"); // 플레이어 로드(미구현)treamReader pd
-        List<PlayerData> playerData = new List<PlayerData>();
+        StreamReader pd = new StreamReader("./PlayerSave.json"); // 플레이어 로드
         string readPData = pd.ReadToEnd();
+        pd.Close();
+        List<PlayerData> playerData = new List<PlayerData>();
         playerData = JsonSerializer.Deserialize<List<PlayerData>>(readPData);
+        Player player = new Player();
+        int inputnum;
+        while (true) 
+        {
+            Write("플레이어 아이디를 입력해주세요 : ");
+            string input = ReadLine();
+            for (int i = 0; i < playerData.Count; i++)
+            {
+                if (input == playerData[i].Name)
+                {
+                    WriteLine("저장된 정보를 로드합니다.");
+                    player = new Player(playerData[i].Name, playerData[i].MaxExp, playerData[i].Exp, playerData[i].Lv,
+                                        playerData[i].Posion, playerData[i].Creadit);
+                    break;
+                }
+            }
+            if(player.GetName == null)
+            {
+                Write("해당 이름으로 아이디를 만드시겠습니까? 1. 예 2. 아니오 : ");
+                if(int.TryParse(ReadLine(), out inputnum))
+                {
+                    if(inputnum == 1)
+                    {
+                        player = new Player(input);
+                        break;
+                    }
+                    else if(inputnum == 2)
+                    {
+                        continue;
+                    }
 
-        Player player;
-        player = new Player(playerData[0].Name, playerData[0].MaxExp, playerData[0].Exp, playerData[0].Lv,
-                            playerData[0].Posion, playerData[0].Creadit);
+                }
+                else
+                {
+                    Write("잘못입력했습니다. 처음으로 돌아갑니다.");
+                    continue;
+                }
+                
+            }else if (player.GetName != null)
+            {
+                break;
+            }
+        }
+    
         List<WeaponData> weaponData = new List<WeaponData>();
         List<Weapon> weaponList = new List<Weapon>();
         string readItemData = iD.ReadToEnd();
@@ -255,9 +302,11 @@ class Field : Enemy
             }
         }
         int lotation = 0;
+        WriteLine("------------------------------------------------------------------------");
         while (true)
         {
             player.ShowInfo();
+            WriteLine("------------------------------------------------------------------------");
             Write("\n전투를 진행할 지역을 선택해주세요 1. 초원 2. 바다 3. 동굴 4. 마을 5. 인벤토리 6. 세이브/종료 : ");
             if (int.TryParse(ReadLine(), out lotation))
             {
@@ -265,7 +314,7 @@ class Field : Enemy
                 if (lotation == 1)
                 {
                     local.f_Name = praList[respon].f_Name;
-                    local.BattlePhase(praList[2], player, weaponList);
+                    local.BattlePhase(praList[respon], player, weaponList);
                 }
                 else if (lotation == 2)
                 {
@@ -292,9 +341,39 @@ class Field : Enemy
                     {
                         Console.WriteLine("해당기능은 미구현입니다.");
                     }
-                }    
+                }
                 else if (lotation == 6)
                 {
+                    StreamWriter sw = new StreamWriter("./PlayerSave.json", false);
+                    bool playerSave = false;
+                    for (int i = 0; i < playerData.Count; i++)
+                    {
+                        if (playerData[i].Name == player.GetName)
+                        {
+                            playerData[i].Name = player.GetName;
+                            playerData[i].MaxExp = player.p_MaxExp;
+                            playerData[i].Exp = player.p_Exp;
+                            playerData[i].Lv = player.Lv;
+                            playerData[i].Posion = player.posion;
+                            playerData[i].Creadit = player.credit;
+                            playerSave = true;
+                        }
+                    }
+                    if(playerSave == false)
+                    {
+                        playerData.Add(new PlayerData());
+                        playerData[playerData.Count - 1].Name = player.GetName;
+                        playerData[playerData.Count - 1].MaxExp = player.p_MaxExp;
+                        playerData[playerData.Count - 1].Exp = player.p_Exp;
+                        playerData[playerData.Count - 1].Lv = player.Lv;
+                        playerData[playerData.Count - 1].Posion = player.posion;
+                        playerData[playerData.Count - 1].Creadit = player.credit;
+                        playerSave = true;
+                    }    
+
+                    readPData = JsonSerializer.Serialize(playerData);
+                    sw.Write(readPData);
+                    sw.Close();
                     return;
                 }
                 else
