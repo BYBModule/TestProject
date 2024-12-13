@@ -32,6 +32,7 @@ class Player
     public Inventory inventory;
     public int credit = 0;
     public int[] itemInventory;
+    public List<Skill> skill;
     public string GetName { get { return p_Name; } }    // 이름을 보기위한 프로퍼티
     public int Lv
     {
@@ -40,6 +41,7 @@ class Player
             return _Lv;
         }
     }   // 레벨을 보기위한 프로퍼티
+    public bool playerAlive = false;
     public Player()
     {
         this.p_Name = null;
@@ -56,6 +58,7 @@ class Player
         this.posion = 5;
         this.p_Exp = 0;
         this._Lv = 1;
+        this.itemInventory = null;
     } // 새로 생성되는 데이터를 저장하는 생성자
     public Player(string name, int p_MaxExp, int p_Exp, 
                      int Lv, int posion, int creadit, int weapon_Number, int[] itemInventory)
@@ -64,17 +67,17 @@ class Player
         {
             this.attack_damage = 5 + (2 * (Lv - 1));
             this.p_MaxHp = 50 + (10 * (Lv - 1));
-            this.p_MaxMp = 20 + (5 * (Lv - 1));
+            this.p_MaxMp = 30 + (10 * (Lv - 1));
         }
         else
         {
             this.attack_damage = 5;
             this.p_MaxHp = 50;
-            this.p_MaxMp = 20;
+            this.p_MaxMp = 30;
         }
         this.p_Name = name;
         this.p_Hp = p_MaxHp;
-        this.p_Mp = p_MaxMp;
+        this.p_Mp = 0;
         this.posion = posion;
         this.p_MaxExp = p_MaxExp;
         this.p_Exp = p_Exp;
@@ -127,9 +130,11 @@ class Player
         if (this.p_Exp - (this.p_MaxExp / 10) >= 0)
         {
             this.p_Exp = this.p_Exp - (this.p_MaxExp / 10);
+            WriteLine($"{p_MaxExp / 10}의 경험치를 잃었습니다.");
         }
         else
         {
+            WriteLine($"{p_Exp}의 경험치를 잃었습니다.");
             this.p_Exp = 0;
         }
         p_Hp = p_MaxHp;
@@ -141,7 +146,6 @@ class Player
         int randDrop = reWard.Next(0, enemy.droptable.item_Number.Length);
         if(lucky < 20)
         {
-
             randDrop = enemy.droptable.item_Number[randDrop];
             Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[randDrop - 1].item_Name);
             if (player.weapon == null)
@@ -220,7 +224,7 @@ class Player
     public float SkillActive(Weapon weapon)
     {
         int input;
-        while (weapon.item_Name != null&&this.p_Mp > 20)
+        while (weapon.item_Name != null && this.p_Mp > 20)
         {
             Write("사용할 스킬을 선택하세요 ");
             if (weapon.weapon_Type == "검")
@@ -229,17 +233,17 @@ class Player
                 input = int.Parse(ReadLine());
                 if (input == 1)
                 {
-                    Write("회전베기!!! ");
+                    WriteLine($"{skill[2].S_Name}");
                     this.p_Mp -= 20;
-                    return 1.5f;
+                    return skill[2].Incr_Damage;
                 }
                 else if (input == 2)
                 {
-                    if (p_Mp > 30)
+                    if (p_Mp >= 30)
                     {
-                        Write("더블어택!!! ");
+                        WriteLine($"{skill[3].S_Name}");
                         this.p_Mp -= 30;
-                        return 2;
+                        return skill[3].Incr_Damage;
                     }
                     else
                     {
@@ -258,17 +262,17 @@ class Player
                 input = int.Parse(ReadLine());
                 if (input == 1)
                 {
-                    Write("블레이즈!!! ");
+                    WriteLine($"{skill[5].S_Name}");
                     this.p_Mp -= 20;
-                    return 1.5f;
+                    return skill[5].Incr_Damage;
                 }
                 else if (input == 2)
                 {
-                    if (p_Mp > 20)
+                    if (p_Mp >= 20)
                     {
-                        Write("아이스애로우!!! ");
+                        Write($"{skill[6].S_Name}");
                         this.p_Mp -= 30;
-                        return 1.8f;
+                        return skill[6].Incr_Damage;
                     }
                     else
                     {
@@ -277,35 +281,36 @@ class Player
                 }
                 else if (input == 3)
                 {
-                    if(p_Mp > 60)
+                    if (p_Mp > 60)
                     {
+                        WriteLine($"{skill[7].S_Name}");
                         this.p_Mp -= 60;
-                        return 3.5f;
+                        return skill[7].Incr_Damage;
+                    }
+                    else
+                    {
+                        WriteLine("잘못 입력했습니다");
+                        continue;
                     }
                 }
-                else
-                {
-                    WriteLine("잘못 입력했습니다");
-                    continue;
-                }
-                return 2.5f;
-            } else if (weapon.weapon_Type == "활")
+            }
+            else if (weapon.weapon_Type == "활")
             {
                 WriteLine("1. 더블 샷, 2. 매그넘 샷");
                 input = int.Parse(ReadLine());
                 if (input == 1)
                 {
-                    Write("더블 샷!!! ");
+                    WriteLine($"{skill[0].S_Name}");
                     this.p_Mp -= 20;
-                    return 1.5f;
+                    return skill[0].Incr_Damage;
                 }
                 else if (input == 2)
                 {
-                    if (p_Mp > 40)
+                    if (p_Mp >= 40)
                     {
-                        Write("매그넘 샷!!! ");
+                        WriteLine($"{skill[1].S_Name}");
                         this.p_Mp -= 30;
-                        return 2.5f;
+                        return skill[1].Incr_Damage;
                     }
                     else
                     {
@@ -317,9 +322,21 @@ class Player
                     WriteLine("잘못 입력했습니다");
                     continue;
                 }
-            }
+            }       
         }
         WriteLine("장착한 무기가 없어서 사용할 수 없습니다.");
         return 0;
     }// 무기에 따라 사용될 다양한 스킬을 저장하는 메소드
+    public bool is_Alive()
+    {
+        if(p_Hp > 0)
+        {
+            playerAlive = true;
+        }
+        else
+        {
+            playerAlive = false;
+        }
+        return playerAlive;
+    } // 플레이어 생존여부
 }

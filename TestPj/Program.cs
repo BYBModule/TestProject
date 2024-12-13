@@ -20,43 +20,40 @@ using static System.Console;
 // 4. 플레이어 행동(공격, 포션사용, 도망)/적 행동
 // 5. 전투 승리/패배 (드랍테이블 확률에 따라 얻은 무기가 기존무기보다 좋으면 자동획득/교체)
 // 6. 해당 내용을 종료할경우 나오는 텍스트 종료전까진 위의 내용을 while(true)로 반복
-// 아이템 자동획득, 자동판매
 // 파일 입출력(플레이어 데이터세이브/로드, 무기 데이터)
 // 인벤토리
-// 각각의 무기마다 다른 스킬을 사용
-// 현재까지 구현된 내용
 // 플레이어 스킬구현
+// 각각의 무기마다 다른 스킬을 사용
+// 인벤토리가 꽉찼을 때 아이템 자동획득, 자동판매
+// 인벤토리 데이터 확인, 장착 및 판매
+// 시련의탑(던전형식 클리어시 보상획득)
+// 몬스터 스킬구현
+// 데이터시트 추가
+// 몬스터 테이블추가
+// 무기 데이터 추가
+// 스킬 데이터 추가
+// 드랍테이블 추가
+// 현재까지 구현된 내용
 // =================================================================================================
-// (추가사항) 몬스터 스킬구현
-// (추가사항) 몬스터 테이블추가
-// (추가사항) 무기 데이터 추가
-// (추가사항) 드랍테이블 추가
-// (추가사항) 무한의탑(던전형식 클리어시 보상획득
 // (추가사항) 코드 최적화
-// (추가사항) 턴(행동주기 설정)추가(가능하면)
+// - 입출력 부분 한 곳에 묶어서 정리(받아오는 데이터 : 몬스터, 드랍, 무기정보, 스킬, (가능하면 몬스터, 무기 데이터 추가))
+// - Player, Enemy클래스 겹치는부분 Character클래스 생성 및 상속
+// - Ingame 메서드 내용 분할
+// - 각 클래스 접근제한, 프로퍼티
+// (추가사항) 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
+// (추가사항) 승리 조건 설정
+// (가능하면) For The King 형식의 선턴(행동주기 설정)추가
+// (가능하면) 맵을 추가하여 맵형식으로 이동
+// (가능하면) 장비아이템과 장비창 추가
+
+
 namespace TestPj
 {
     internal class Program
     {
-
         static void Main(string[] args)
         {
-            StreamReader sr = new StreamReader("./EnemyList.csv");
-
-            List<Enemy> enemyList = new List<Enemy>();
-            bool e_ListLine = false;
-            while (sr.Peek() >= 0)
-            {
-                string[] readData = sr.ReadLine().Split(',');
-                if(e_ListLine == false)
-                {
-                    e_ListLine = true;
-                    continue;
-                }
-                enemyList.Add(new Enemy(int.Parse(readData[0]), readData[1], int.Parse(readData[2]), int.Parse(readData[3]),
-                                        int.Parse(readData[4]), readData[5]));
-            }
-            new Field().Ingame(enemyList);
+            new Field().Ingame();
         }
     }
 }

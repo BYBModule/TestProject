@@ -10,7 +10,7 @@ class WeaponData
     public string Item_Name { get; set; }           // 아이템 이름
     public int Sell_Price { get; set; }             // 판매가격
     public int Item_Number { get; set; }            // 아이템 고유번호
-}
+}                   // 무기 데이터를 받기위한 클래스
 class Weapon
 {
     public int damage;
@@ -38,5 +38,5 @@ class Weapon
     public void WeaponDataInfo()
     {
         Console.WriteLine($"공격력 : {damage}\n무기타입 : {weapon_Type}\n아이템 명 : {item_Name}\n판매가격 : {sell_Price}");
-    }
+    }           // 무기정보를 출력합니다
 }

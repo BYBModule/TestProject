@@ -19,36 +19,32 @@ class Inventory
             result[i] = weapons[i].itemNumber;
         }
         return result;
-    }
-    public void SetInventory()
-    {
-
-    }
-    public void InventoryInfo()
+    }                             // 인벤토리번호에 있는 아이템의 정보를 얻기위한 클래스
+    public void InventoryInfo(Player player)                    
     {
         if (weapons != null)
         {
-            for(int i = 0; i < weapons.Count; i++)
+            itemCount = 0;
+            for (int i = 0; i < weapons.Count; i++)
             {
                 Console.Write("■");
-                if(i != 0&&i%5 == 0)
+                if(++itemCount%5 == 0)
                 {
                     Console.WriteLine();
                 }
-                itemCount++;
             }
-            Console.WriteLine("현재 인벤토리는 {0}칸 남았습니다.", 20 - itemCount);
+            Console.WriteLine("\n현재 인벤토리는 {0}칸 남았습니다.", 20 - itemCount);
             while (true)
             {
                 Console.Write("몇번칸을 확인 하겠습니까? : ");
-                int index = int.Parse(Console.ReadLine());
+                int itIndex = int.Parse(Console.ReadLine());
                 {
-                    if (index > 0 && index < 20)
+                    if (itIndex > 0 && itIndex < 20)
                     {
 
-                        if (index <= itemCount)
+                        if (itIndex <= itemCount)
                         {
-                            weapons[index - 1].WeaponDataInfo();
+                            weapons[itIndex - 1].WeaponDataInfo();
                         }
                         else
                         {
@@ -58,25 +54,33 @@ class Inventory
 
                     }
                 }
-                Console.Write("1. 다른 칸 확인하기 2. 나가기 : ");
-                index = int.Parse(Console.ReadLine());
+                Console.Write("1. 다른 칸 확인하기 2. 착용 3. 판매 4. 나가기 : ");
+                int index = int.Parse(Console.ReadLine());
                 if(index == 1)
                 {
                     continue;
                 }
                 else if(index == 2)
                 {
+                    Weapon temp = new Weapon();
+                    temp = player.Weapon;
+
+                    player.Weapon = weapons[itIndex - 1];
+                    player.WearingWeapon(weapons[itIndex - 1]);
+                    weapons[itIndex - 1] = temp;
+                    return;
+                }
+                else if(index == 3)
+                {
+                    player.credit += weapons[itIndex - 1].sell_Price;
+                    weapons.Remove(weapons[itIndex - 1]);
                     break;
                 }
-                else
-                {
-                }
             }
-            itemCount = 0;
         }
         else
         {
             Console.WriteLine("아이템이 없습니다.");
         }
-    }
+    }   // 인벤토리의 아이템의 행동을 저장한 클래스
 }
