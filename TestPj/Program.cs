@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.Design;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Text.Json;
-using System.Threading;
 using static System.Console;
 // 레벨에 따라 최대 Hp, Mp, 공격력을 증가시키고 필요 경험치를 증가시킵니다.
 // 플레이어의 행동은 공격, 포션사용, 도망                (0, 1, 2)  
@@ -33,28 +33,660 @@ using static System.Console;
 // 무기 데이터 추가
 // 스킬 데이터 추가
 // 드랍테이블 추가
-// 현재까지 구현된 내용
-// =================================================================================================
-// (추가사항) 코드 최적화
 // - 입출력 부분 한 곳에 묶어서 정리(받아오는 데이터 : 몬스터, 드랍, 무기정보, 스킬, (가능하면 몬스터, 무기 데이터 추가))
 // - Player, Enemy클래스 겹치는부분 Character클래스 생성 및 상속
 // - Ingame 메서드 내용 분할
 // - 각 클래스 접근제한, 프로퍼티
+// 스킬 타입에 따라 다른 디메리트를 줌(스턴, 저주(공격력감소), 화상(도트데미지),
+//                                     흡혈(타격시 체력회복))
+// 현재까지 구현된 내용
+// =================================================================================================
 // (추가사항) 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
 // (추가사항) 승리 조건 설정
-// (가능하면) For The King 형식의 선턴(행동주기 설정)추가
 // (가능하면) 맵을 추가하여 맵형식으로 이동
 // (가능하면) 장비아이템과 장비창 추가
-
-
-namespace TestPj
+// (가능하면) 잡화상점, 장비상점 구현
+// (가능하면) 저장된 플레이어 데이터를 들고와 배틀페이즈 실행 (PvP)
+// (가능하면) For The King 형식의 선턴(행동주기 설정)추가
+namespace TestCode
 {
     internal class Program
     {
+        // json 파일로 저장된 데이터시트를 불러오기위한 제너릭클래스
+        class DataSheet<T>   
+        {
+            public List<T> DataIn(string dataSheet)
+            {
+                StreamReader DataTable = new StreamReader($"./{dataSheet}.json");
+                string data = DataTable.ReadToEnd();
+                DataTable.Close();
+                List<T> dataList = new List<T>();
+                List<T> reData = new List<T>();
+                dataList = JsonSerializer.Deserialize<List<T>>(data);
+                for ( int i = 0; i < dataList.Count; i++)
+                {
+                    reData.Add(dataList[i]);
+                }
+                return reData;
+            }
+        }
+         // 몬스터데이터를 타입에따라 분할하고 드랍테이블을 설정합니다.
+        public static List<Enemy> Divide(List<Enemy> list, List<DropTable> drop, string Type)                   
+        {
+            List<Enemy> reData = new List<Enemy>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Type == Type)
+                {
+                    reData.Add(new Enemy(list[i].Damage, list[i].Name, list[i].MaxHp, list[i].MaxMp, list[i].Exp, list[i].Type));                  
+                }
+            }
+            for (int i = 0; i < reData.Count; i++)
+            {
+                for (int j = 0; j < drop.Count; j++)
+                {
+                    if (reData[i].name == drop[j].enemy_Name)
+                    {
+                        reData[i].droptable = drop[j];
+                    }
+                }
+            }
+            return reData;
+        }
+        // 플레이어의 로그인을 처리하는 메소드
+        public static Player PlayerLogin(List<Player> playerData, List<Weapon> weaponList, Player player)
+        {
+            int inputnum;
+            while (true)
+            {
+                Write("플레이어 아이디를 입력해주세요 : ");
+                string input = ReadLine();
+                for (int i = 0; i < playerData.Count; i++)
+                {
+                    if (input == playerData[i].Name)
+                    {
+                        WriteLine("저장된 정보를 로드합니다.");
+                        player = new Player(playerData[i].Name, playerData[i].Exp, playerData[i].Lv,
+                                            playerData[i].Posion, playerData[i].Credit, playerData[i].Weapon_Number, playerData[i].ItemInventory);
+                        if (player.weapon_Number != 0)
+                        {
+                            player.weapon = new Weapon();
+                            player.weapon = weaponList[playerData[i].Weapon_Number - 1];
+                            player.WearingWeapon(weaponList[playerData[i].Weapon_Number - 1]);
+                        }
+                        return player;
+                    }
+                }
+                if (player.name == null)
+                {
+                    Write("해당 이름으로 아이디를 만드시겠습니까? 1. 예 2. 아니오 : ");
+                    if (int.TryParse(ReadLine(), out inputnum))
+                    {
+                        if (inputnum == 1)
+                        {
+                            player = new Player(input);
+                            return player;
+                        }
+                        else if (inputnum == 2)
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Write("잘못입력했습니다. 처음으로 돌아갑니다.");
+                        continue;
+                    }
+                }
+                else if (player.name != null)
+                {
+                    break;
+                }
+
+            }
+            return null;
+        }   
+        // 데이터 저장을 위한 메소드
+        public static void PlayerLogout(List<Player> playerData, Player player, string saveFile)
+        {
+            StreamWriter sw = new StreamWriter($"./{saveFile}.json", false);
+            bool playerSave = false;
+            for (int i = 0; i < playerData.Count; i++)
+            {
+                if (playerData[i].Name == player.name)
+                {
+                    playerData[i].Name = player.name;
+                    playerData[i].Exp = player.exp;
+                    playerData[i].Lv = player.lv;
+                    playerData[i].Posion = player.posion;
+                    playerData[i].Credit = player.credit;
+                    playerData[i].Weapon_Number = player.weapon_Number;
+                    playerData[i].ItemInventory = player.inventory.GetInventory();
+                    playerSave = true;
+                }
+            }
+            if (playerSave == false)
+            {
+                playerData.Add(new Player());
+                playerData[playerData.Count - 1].Name = player.name;
+                playerData[playerData.Count - 1].Exp = player.exp;
+                playerData[playerData.Count - 1].Lv = player.lv;
+                playerData[playerData.Count - 1].Posion = player.posion;
+                playerData[playerData.Count - 1].Credit = player.credit;
+                playerData[playerData.Count - 1].Weapon_Number = player.weapon_Number;
+                playerData[playerData.Count - 1].ItemInventory = player.inventory.GetInventory();
+                playerSave = true;
+            }
+            string save = JsonSerializer.Serialize(playerData);
+            sw.Write(save);
+            sw.Close();
+            return;
+        }            
+         // 배틀페이즈 처리
+        public static void BattlePhase(List<Weapon> weaponList,Enemy enemy, Player player)
+        {
+            Random critical = new Random();
+            int value;
+            float skillDamage;
+            WriteLine("------------------------------------------------------------------------");
+            enemy.ShowInfo();
+            WriteLine("------------------------------------------------------------------------");
+            while (true)
+            {
+
+                if (player.playerTurn == true)
+                {
+                    player.ShowInfo();
+                    WriteLine("------------------------------------------------------------------------");
+                    Write("1.공격 2.회복 3.스킬사용 4. 도망 : ");
+                    if (int.TryParse(ReadLine(), out value))
+                    {
+                        WriteLine("\n------------------------------------------------------------------------");
+                        if (value == 1)
+                        {
+                            if (10 > critical.Next(0, 100))
+                            {
+                                WriteLine("치명타 발생!");
+                                enemy.hp = enemy.hp - (player.damage * 2);
+                                WriteLine("{0}의 데미지를 입혔습니다.", (player.damage * 2));
+                            }
+                            else
+                            {
+                                enemy.hp = enemy.hp - player.damage;
+                                WriteLine("{0}의 데미지를 입혔습니다.", (player.damage));
+                            }
+                        }
+                        else if (value == 2)
+                        {
+                            if (player.posion > 0)
+                            {
+                                if (player.hp + (player.maxHp / 2) <= player.hp)
+                                {
+                                    WriteLine("{0}의 체력을 회복시켰습니다.", (player.maxHp / 2));
+                                    player.hp = player.hp + (player.maxHp / 2);
+                                    player.posion = player.posion - 1;
+                                    WriteLine("사용 가능한 포션은 {0}개 입니다", player.posion);
+                                }
+                                else
+                                {
+                                    WriteLine("{0}의 체력을 회복시켰습니다.", (player.maxHp - player.hp));
+                                    player.hp = player.maxHp;
+                                    player.posion = player.posion - 1;
+                                    WriteLine("사용 가능한 포션은 {0}개 입니다", player.posion);
+                                }
+                            }
+                            else
+                            {
+                                WriteLine("사용 할 수 있는 포션이 없습니다.");
+                                continue;
+                            }
+                        }
+                        else if (value == 3)
+                        {
+                            if (player.weapon != null)
+                            {
+                                if (player.mp >= 20)
+                                {
+                                    skillDamage = player.SkillActive();
+                                    if (skillDamage > 0)
+                                    {
+                                        if (10 > critical.Next(0, 100))
+                                        {
+                                            WriteLine("치명타 발생!");
+                                            enemy.hp = enemy.hp - (int)(player.damage * 2 * skillDamage);
+                                            WriteLine("{0}의 데미지를 입혔습니다.", (int)(player.damage * 2 * skillDamage));
+                                        }
+                                        else
+                                        {
+                                            enemy.hp = enemy.hp - (int)(player.damage * skillDamage);
+                                            WriteLine("{0}의 데미지를 입혔습니다.", (int)(player.damage * skillDamage));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        WriteLine("스킬사용이 취소되었습니다.");
+                                        continue;
+                                    }
+                                }
+                                else
+                                {
+                                    WriteLine("마나가 부족합니다.");
+                                    continue;
+                                }
+
+                            }
+                            else
+                            {
+                                WriteLine("무기를 착용하지 않았습니다.");
+                            }
+                        }
+                        else if (value == 4)
+                        {
+                            enemy.hp = enemy.maxHp;
+                            enemy.mp = 0;
+                            WriteLine("전투에서 도망쳤습니다.");
+                            WriteLine("------------------------------------------------------------------------");
+                            if (enemy.type == "보스")
+                            {
+                                player.hp = 0;
+                            }
+                            return;
+                        }
+                        else
+                        {
+                            WriteLine("1 ~ 3 이내의 숫자를 입력해 주세요");
+                            continue;
+                        }
+                        WriteLine("------------------------------------------------------------------------");
+                        enemy.ShowInfo();
+                    }
+                    else
+                    {
+                        WriteLine("숫자를 입력해주세요");
+                        continue;
+                    }
+                    if (player.deBurfCount > 0)
+                    {
+                        if (player.deBurfType == "Burn")
+                        {
+                            enemy.Burn();
+                            player.deBurfCount -= 1;
+                        }
+                        if (player.deBurfType == "Curse")
+                        {
+                            if (player.deBurfCount == 3)
+                            {
+                                enemy.Curse();
+                            }
+                            if (player.deBurfCount == 1)
+                            {
+                                enemy.damage = enemy.dummyDamage;
+                            }
+                            player.deBurfCount -= 1;
+                        }
+                    }
+                    if (player.mp <= player.maxMp)
+                    {
+                        player.mp += 10;
+                    }
+                    if (player.hitStun == true)
+                    {
+                        WriteLine("------------------------------------------------------------------------");
+                        WriteLine("몬스터가 스턴상태입니다 해당 턴을 스킵합니다.");
+                        WriteLine("------------------------------------------------------------------------");
+                        player.hitStun = false;
+                        player.playerTurn = true;
+                    }
+                    else
+                    {
+                        player.playerTurn = false;
+                    }
+                }
+                else if (player.playerTurn == false)
+                {
+                    WriteLine("------------------------------------------------------------------------");
+                    if (enemy.mp >= 40)
+                    {
+                        skillDamage = enemy.SkillActive();
+                        if (10 > critical.Next(0, 100))
+                        {
+                            WriteLine("적의 치명타 발생!!!");
+                            WriteLine("{0}의 데미지를 입었습니다.", (int)((enemy.damage * 2) * skillDamage));
+                            player.hp = player.hp - (int)((enemy.damage * 2) * skillDamage);
+                            enemy.mp = 0;
+                        }
+                        else
+                        {
+                            WriteLine("{0}의 데미지를 입었습니다.", (int)(enemy.damage * skillDamage));
+                            player.hp = player.hp - (int)(enemy.damage * skillDamage);
+                            enemy.mp = 0;
+                        }
+                    }
+                    else
+                    {
+                        if (10 > critical.Next(0, 100))
+                        {
+                            WriteLine("적의 치명타 발생!!!");
+                            WriteLine("{0}의 데미지를 입었습니다.", (enemy.damage * 2));
+                            player.hp = player.hp - (enemy.damage * 2);
+                        }
+                        else
+                        {
+                            WriteLine("{0}의 데미지를 입었습니다.", (enemy.damage));
+                            player.hp = player.hp - enemy.damage;
+                        }
+                    }
+                    if (enemy.mp <= enemy.maxMp)
+                    {
+                        enemy.mp += 10;
+                    }
+                    if (enemy.deBurfCount > 0)
+                    {
+                        if (enemy.deBurfType == "Burn")
+                        {
+                            player.Burn();
+                            enemy.deBurfCount -= 1;
+                        }
+                        if (enemy.deBurfType == "Curse")
+                        {
+                            if (enemy.deBurfCount == 3)
+                            {
+                                player.Curse();
+                            }
+                            if(enemy.deBurfCount == 1)
+                            {
+                                player.damage = player.dummyDamage;
+                            }
+                            enemy.deBurfCount -= 1;                         
+                        }
+                    }
+                    if (enemy.hitStun == true)
+                    {
+                        WriteLine("------------------------------------------------------------------------");
+                        WriteLine("플레이어가 스턴상태입니다 해당 턴을 스킵합니다.");
+                        enemy.hitStun = false;
+                        player.playerTurn = false;
+                    }
+                    else
+                    {
+                        player.playerTurn = true;
+                        WriteLine("------------------------------------------------------------------------");
+                    }
+
+                }
+                if (enemy.hp <= 0 || player.IsAlive() == false)
+                {
+                    WriteLine("------------------------------------------------------------------------");
+                    player.ShowInfo();
+                    WriteLine("------------------------------------------------------------------------");
+                    WriteLine("\n전투종료");
+                    player.deBurfCount = 0;
+                    enemy.deBurfCount = 0;
+                    player.damage = player.dummyDamage;
+                    enemy.damage = enemy.dummyDamage;
+                    if (enemy.hp <= 0)
+                    {
+                        WriteLine("전투에서 승리했습니다.\n");
+                        if (enemy.type != "보스")
+                        {
+
+                            player.Reward(enemy, player, weaponList);
+                        }
+                        player.mp = 0;
+                        enemy.hp = enemy.maxHp;
+                        enemy.mp = 0;
+                        player.playerTurn = true;
+                        return;
+                    }
+                    else
+                    {
+                        WriteLine("전투에서 패배하였습니다.\n");
+                        enemy.hp = enemy.maxHp;
+                        enemy.mp = 0;
+                        if (enemy.type != "보스")
+                        {
+                            player.Dead();
+                        }
+                        player.playerTurn = true;
+                        return;
+                    }
+                }
+            }
+        }                 
+        // 지역이동을 처리하는 메소드
+        public static void FieldMove(List<Enemy> praList, List<Enemy> seaList, List<Enemy> caveList
+                                   , List<Enemy> deep_CaveList, List<Enemy> bossList
+                                   , Player player, List<Weapon> weaponList)
+        {
+            int lotation = 0;
+            int killCount = 0;
+            while (true)
+            {
+                WriteLine("------------------------------------------------------------------------");
+                player.ShowInfo();
+                WriteLine("------------------------------------------------------------------------");
+                Write("\n전투를 진행할 지역을 선택해주세요 1. 초원 2. 바다 3. 동굴 4. 시련의 탑 5. 이전 ");
+                if (int.TryParse(ReadLine(), out lotation))
+                {
+                    int respon = new Random().Next(1, 100);   // 지역몹을 랜덤하게 리스폰하기위한 변수
+                    if (lotation == 1)                                                                  // 전투지역
+                    {
+                        BattlePhase(weaponList, praList[respon % praList.Count], player);
+                    }
+                    else if (lotation == 2)                                                             // 전투지역
+                    {
+                        BattlePhase(weaponList, seaList[respon % seaList.Count], player);
+                    }
+                    else if (lotation == 3)                                                             // 전투지역
+                    {
+                        WriteLine("1. 초입 2. 심층");
+                        if (int.TryParse(ReadLine(), out lotation))
+                        {
+                            if (lotation == 1)
+                            {
+                                BattlePhase(weaponList, caveList[respon % caveList.Count], player);
+                            }
+                            else if (lotation == 2)
+                            {
+                                BattlePhase(weaponList, deep_CaveList[respon % deep_CaveList.Count], player);
+                            }
+                            else
+                            {
+                                WriteLine("다시 입력해주세요. ");
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            WriteLine("다시 입력해주세요. ");
+                            continue;
+                        }
+                    }else if(lotation == 4)
+                    {
+                        while (true)
+                        {
+                            Enemy Dummy = bossList[new Random().Next(0, bossList.Count)];
+                            for (int i = 0; i <= killCount; i++)
+                            {
+                                Dummy.maxHp += (int)Dummy.maxHp / 10;
+                                Dummy.hp = Dummy.maxHp;
+                                Dummy.damage += (int)Dummy.damage / 10;
+                            }
+                            BattlePhase(weaponList, Dummy, player);
+                            if (player.IsAlive() == false)
+                            {
+                                player.Dead();
+                                break;
+                            }
+                            killCount++;
+                        }
+                        if (killCount > 0)
+                        {
+                            WriteLine($"총 {killCount} 층 올라가셨습니다.");
+                            Write("보상내용");// 미구현
+                            WriteLine();
+
+                        }
+                        else
+                        {
+                            WriteLine("탑을 오르는데 실패했습니다.");
+                            return;
+                        }
+                        killCount = 0;
+                    }
+                    else if(lotation == 5)
+                    {
+                        return;
+                    }
+                }
+            }
+        }               
+        // 마을에서의 행동을 처리하는 메소드
+        public static void Town(Player player)
+        {
+            int state;
+            player.hp = player.maxHp;
+            WriteLine("------------------------------------------------------------------------");
+            WriteLine("플레이어 체력이 회복되었습니다.");
+            WriteLine("------------------------------------------------------------------------");
+            while (true)
+            {
+                WriteLine("하고자 하는 행동을 선택해주세요 1. 지역이동, 2. 포션구입(포션의 가격은 {0}원 입니다.)", (20 * (player.lv + 1)));
+                if (int.TryParse(ReadLine(), out state))
+                {
+
+                    if (state == 1)
+                    {
+                        return;
+                    }
+                    else if (state == 2 && player.posion < (10 + player.lv))
+                    {
+                        // 포션구입
+                        if (20 * (player.lv + 1) < player.credit)
+                        {
+                            WriteLine("포션을 구입했습니다.");
+                            player.posion = player.posion + 1;
+                            player.credit = player.credit - (20 * (player.lv + 1));
+                            WriteLine("포션은 최대 {0}개 가질 수 있습니다.", (10 + player.lv) - 1);
+                            player.ShowInfo();
+                        }
+                        else
+                        {
+                            WriteLine("돈이 부족합니다..");
+                        }
+                    }
+                    else if (state == 2 && player.posion >= (10 + player.lv))
+                    {
+                        WriteLine("포션의 개수가 너무 많습니다.");
+                    }
+                    else
+                    {
+                        WriteLine("잘못입력했습니다.");
+                    }
+                }
+                else
+                {
+                    WriteLine("잘못입력했습니다. 다시 입력해주세요");
+                    break;
+                }
+            }
+        }
+        // 인게임 메소드
+        public static void Ingame()
+        {
+            DataSheet<DropTable> dropTable = new DataSheet<DropTable>();
+            DataSheet<Player> p_DataSheet = new DataSheet<Player>();
+            DataSheet<Enemy> e_DataSheet = new DataSheet<Enemy>();
+            DataSheet<Weapon> w_DataSheet = new DataSheet<Weapon>();
+            DataSheet<Skill> s_DataSheet = new DataSheet<Skill>();
+            List<Skill> skillList = s_DataSheet.DataIn("SkillData");
+            List<DropTable> drop = dropTable.DataIn("DropTable");
+
+            List<Player> playerList = p_DataSheet.DataIn("PlayerSave");
+            List<Enemy> enemies = e_DataSheet.DataIn("Monster");
+            List<Weapon> weapons = w_DataSheet.DataIn("WeaponType");
+            List<Enemy> praList = new List<Enemy>();
+            List<Enemy> seaList = new List<Enemy>();
+            List<Enemy> caveList = new List<Enemy>();
+            List<Enemy> deep_CaveList = new List<Enemy>();
+            List<Enemy> bossList = new List<Enemy>();
+
+            Player player = new Player();
+            player = PlayerLogin(playerList, weapons, player);
+            player.inventory = new Inventory();
+            if (player.itemInventory != null)
+            {
+                for (int i = 0; i < player.itemInventory.Length; i++)
+                {
+                    player.inventory.weapons.Add(weapons[player.itemInventory[i] - 1]);
+                }
+            }
+            praList = Divide(enemies, drop, "초원");
+            seaList = Divide(enemies, drop, "바다");
+            caveList = Divide(enemies, drop, "동굴(초입)");
+            deep_CaveList = Divide(enemies, drop, "동굴(심층)");
+            bossList = Divide(enemies, drop, "보스");
+            player.skill = new List<Skill>();
+            for (int i = 0; i < skillList.Count; i++)
+            {
+                if (skillList[i].Char_Name == "Player")
+                {
+                    player.skill.Add(skillList[i]);
+                }
+            }
+            for (int i = 0; i < bossList.Count; i++)
+            {
+                bossList[i].skill = new List<Skill>();
+                for (int j = 0; j < skillList.Count; j++)
+                {
+
+                    if (bossList[i].name == skillList[j].Char_Name)
+                    {
+                        bossList[i].skill.Add(skillList[j]);
+                    }
+                }
+            }
+            int lotation = 0;
+            while (true)
+            {
+                WriteLine("------------------------------------------------------------------------");
+                player.ShowInfo();
+                WriteLine("------------------------------------------------------------------------");
+                WriteLine("하고자 하는 행동을 선택해주세요 1. 인벤토리, 2. 지역이동, 3. 마을, 4. 세이브/종료");
+                if (int.TryParse(ReadLine(), out lotation))
+                {
+                    if (lotation == 1)                                                            // 인벤토리
+                    {
+                        if (player.inventory != null)
+                        {
+                            player.inventory.InventoryInfo(player);
+                        }
+                        else
+                        {
+                            Console.WriteLine("아이템이 없습니다.");
+                        }
+                    }
+                    else if (lotation == 2)
+                    {
+                        FieldMove(praList, seaList, caveList, deep_CaveList, bossList
+                                , player, weapons);
+                    }
+                    else if (lotation == 3)
+                    {
+                        Town(player);
+                    }
+                    else if (lotation == 4)
+                    {
+                        PlayerLogout(playerList, player, "PlayerSave");
+                        return;
+                    }
+                }
+            }
+        }                                                                         
+
         static void Main(string[] args)
         {
-            new Field().Ingame();
+            Ingame();
         }
     }
 }
-
