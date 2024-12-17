@@ -68,7 +68,7 @@ class Character
     public void Burn()          // 일정시간 지속적으로 피해를 입음
     {
         Console.WriteLine("몸이 불타 체력이 서서히 감소합니다.");
-        if (this.hp > this.hp - (this.maxHp / 10))
+        if (this.hp < this.hp - (this.maxHp / 10))
         {
             Console.WriteLine($"{this.hp - (this.maxHp / 10)}의 체력이 감소했습니다.");
         }

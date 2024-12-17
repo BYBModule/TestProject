@@ -38,10 +38,9 @@ using static System.Console;
 // - Ingame 메서드 내용 분할
 // - 각 클래스 접근제한, 프로퍼티
 // 스킬 타입에 따라 다른 디메리트를 줌(스턴, 저주(공격력감소), 화상(도트데미지), 흡혈(타격시 체력회복))
+// 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
 // 현재까지 구현된 내용
 // =================================================================================================
-// (추가사항) 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
-// (추가사항) 승리 조건 설정
 // (가능하면) 맵을 추가하여 맵형식으로 이동
 // (가능하면) 장비아이템과 장비창 추가
 // (가능하면) 잡화상점, 장비상점 구현
@@ -312,13 +311,16 @@ namespace TestCode
                         }
                         if (player.deBurfType == "Curse")
                         {
-                            if (player.deBurfCount == 4)
+                            if (player.deBurfCount == 3)
                             {
                                 enemy.Curse();
                             }
                             if (player.deBurfCount == 1)
                             {
-                                enemy.damage = enemy.dummyDamage;
+                                if (enemy.dummyDamage > 0)
+                                {
+                                    enemy.damage = enemy.dummyDamage;
+                                }
                             }
                             player.deBurfCount -= 1;
                         }
@@ -387,13 +389,16 @@ namespace TestCode
                         }
                         if (enemy.deBurfType == "Curse")
                         {
-                            if (enemy.deBurfCount == 4)
+                            if (enemy.deBurfCount == 3)
                             {
                                 player.Curse();
                             }
                             if(enemy.deBurfCount == 1)
                             {
-                                player.damage = player.dummyDamage;
+                                if (player.dummyDamage > 0)
+                                {
+                                    player.damage = player.dummyDamage;
+                                }
                             }
                             enemy.deBurfCount -= 1;                         
                         }
@@ -464,6 +469,7 @@ namespace TestCode
         {
             int lotation = 0;
             int killCount = 0;
+            int bossChoice = 0;
             while (true)
             {
                 WriteLine("------------------------------------------------------------------------");
@@ -507,29 +513,91 @@ namespace TestCode
                         }
                     }else if(lotation == 4)
                     {
+                        int reWardCredit = 0;
+                        
+                        Enemy Dummy;
                         while (true)
                         {
-                            Enemy Dummy = bossList[new Random().Next(0, bossList.Count)];
-                            for (int i = 0; i <= killCount; i++)
+                            if (killCount < 15)
                             {
-                                Dummy.maxHp += (int)Dummy.maxHp / 10;
-                                Dummy.hp = Dummy.maxHp;
-                                Dummy.damage += (int)Dummy.damage / 10;
+                                Dummy = bossList[new Random().Next(0, 2)];
+                                for (int i = 0; i <= killCount; i++)
+                                {
+                                    Dummy.maxHp += (int)Dummy.maxHp / 20;
+                                    Dummy.hp = Dummy.maxHp;
+                                    Dummy.damage += (int)Dummy.damage / 20;
+                                }
+                                BattlePhase(weaponList, Dummy, player);
+                                if (player.IsAlive() == false)
+                                {
+                                    player.Dead();
+                                    break;
+                                }
                             }
-                            BattlePhase(weaponList, Dummy, player);
-                            if (player.IsAlive() == false)
+                            else
                             {
-                                player.Dead();
-                                break;
+                                int index;
+                                WriteLine("도전자격이 갖춰졌습니다. 도전하고자 하는 보스를 선택해주세요");
+                                WriteLine("1. 데스나이트, 2. 실피드, 3. 데몬로드");
+                                if(int.TryParse(ReadLine(), out index))
+                                {
+                                    if (index == 1)
+                                    {
+                                        bossChoice = 3;
+                                        Dummy = bossList[3];
+                                        BattlePhase(weaponList, Dummy, player);
+                                    }
+                                    else if (index == 2)
+                                    {
+                                        bossChoice = 4;
+                                        Dummy = bossList[4];
+                                        BattlePhase(weaponList, Dummy, player);
+                                    }
+                                    else if (index == 3)
+                                    {
+                                        bossChoice = 5;
+                                        Dummy = bossList[5];
+                                        BattlePhase(weaponList, Dummy, player);
+                                    }
+                                    else
+                                    {
+                                        WriteLine("잘못입력했습니다 다시입력해주세요");
+                                    }
+                                }
+                                else
+                                {
+                                    WriteLine("잘못입력했습니다. 다시입력해주세요");
+                                    continue;
+                                }
                             }
+                            reWardCredit += 40 * (killCount + 1);
                             killCount++;
                         }
                         if (killCount > 0)
                         {
                             WriteLine($"총 {killCount} 층 올라가셨습니다.");
-                            Write("보상내용");// 미구현
-                            WriteLine();
-
+                            WriteLine("보상내용");
+                            if (killCount > 5 && killCount < 10)
+                            {
+                                // 도전자무기 Ⅰ
+                                player.Reward(bossList[new Random().Next(0, 2)], player, weaponList);
+                            }
+                            else if (killCount >= 10 && killCount < 15)
+                            {
+                                // 도전자무기 Ⅱ
+                                player.Reward(bossList[new Random().Next(0, 2)], player, weaponList);
+                            }
+                            else if( killCount == 15)
+                            {
+                                WriteLine("최종보상을 획득하셨습니다.");
+                                player.Reward(bossList[bossChoice], player, weaponList);
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                            WriteLine($"{reWardCredit} 크레딧을 획득하셨습니다.");
+                            player.credit += reWardCredit;
                         }
                         else
                         {
@@ -603,17 +671,18 @@ namespace TestCode
             DataSheet<Enemy> e_DataSheet = new DataSheet<Enemy>();
             DataSheet<Weapon> w_DataSheet = new DataSheet<Weapon>();
             DataSheet<Skill> s_DataSheet = new DataSheet<Skill>();
-            List<Skill> skillList = s_DataSheet.DataIn("SkillData");
-            List<DropTable> drop = dropTable.DataIn("DropTable");
+            List<Skill> skillList = s_DataSheet.DataIn("SkillDataTest");
+            List<DropTable> drop = dropTable.DataIn("DropTest");
 
             List<Player> playerList = p_DataSheet.DataIn("PlayerSave");
-            List<Enemy> enemies = e_DataSheet.DataIn("Monster");
-            List<Weapon> weapons = w_DataSheet.DataIn("WeaponType");
+            List<Enemy> enemies = e_DataSheet.DataIn("MonsterTest");
+            List<Weapon> weapons = w_DataSheet.DataIn("WeaponTypeTest");
             List<Enemy> praList = new List<Enemy>();
             List<Enemy> seaList = new List<Enemy>();
             List<Enemy> caveList = new List<Enemy>();
             List<Enemy> deep_CaveList = new List<Enemy>();
             List<Enemy> bossList = new List<Enemy>();
+            List<Enemy> forestList = new List<Enemy>();
 
             Player player = new Player();
             player = PlayerLogin(playerList, weapons, player);
@@ -630,6 +699,7 @@ namespace TestCode
             caveList = Divide(enemies, drop, "동굴(초입)");
             deep_CaveList = Divide(enemies, drop, "동굴(심층)");
             bossList = Divide(enemies, drop, "보스");
+            forestList = Divide(enemies, drop, "죽음의숲");
             player.skill = new List<Skill>();
             for (int i = 0; i < skillList.Count; i++)
             {

@@ -132,53 +132,89 @@ class Player : Character
         Random reWard = new Random();
         int lucky = reWard.Next(0, 100);
         int randDrop = reWard.Next(0, enemy.droptable.item_Number.Length);
-        if (lucky < 20)
+        int drop = enemy.droptable.item_Number[0];
+        if (enemy.type == "보스")
         {
-            randDrop = enemy.droptable.item_Number[randDrop];
-            WriteLine("------------------------------------------------------------------------");
-            Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[randDrop - 1].Item_Name);
-            if (player.weapon == null)
+            Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[drop].Item_Name);
+            if (player.weapon.Damage < weaponList[drop].Damage)
             {
-                WearingWeapon(weaponList[randDrop - 1]);
-            }
-            else if (player.weapon != null)
-            {
-                if (player.weapon.Damage < weaponList[randDrop - 1].Damage)
+                if (inventory.weapons.Count >= 20)
                 {
-                    if (inventory.weapons.Count >= 20)
-                    {
-                        Write("장착중인 아이템이 자동판매 되었습니다. : ");
-                        player.credit += player.weapon.Sell_Price;
-                        WriteLine($"{player.weapon.Sell_Price}크레딧을 획득하셨습니다");
-                        WearingWeapon(weaponList[randDrop - 1]);
-                    }
-                    else
-                    {
-                        inventory.weapons.Add(weapon);
-                    }
+                    Write("장착중인 아이템이 자동판매 되었습니다. : ");
+                    credit += weapon.Sell_Price;
+                    WriteLine($"{weapon.Sell_Price}크레딧을 획득하셨습니다");
+                    WearingWeapon(weaponList[drop]);
                 }
                 else
                 {
-                    if (inventory.weapons.Count >= 20)
-                    {
-                        Write("획득한 아이템을 판매합니다. : ");
-                        player.credit += weaponList[randDrop - 1].Sell_Price;
-                        WriteLine($"{weaponList[randDrop - 1].Sell_Price} 크레딧을 획득하셨습니다");
-                    }
-                    else
-                    {
-                        inventory.weapons.Add(weaponList[randDrop - 1]);
-                    }
+                    inventory.weapons.Add(weapon);
+                    WearingWeapon(weaponList[drop]);
+                }
+            }
+            else
+            {
+                if (inventory.weapons.Count >= 20)
+                {
+                    Write("획득한 아이템을 판매합니다. : ");
+                    credit += weaponList[drop].Sell_Price;
+                    WriteLine($"{weaponList[drop].Sell_Price} 크레딧을 획득하셨습니다");
+                }
+                else
+                {
+                    inventory.weapons.Add(weaponList[drop]);
                 }
             }
         }
-        player.exp = exp + enemy.exp;
-        player.credit = player.credit + (enemy.exp * reWard.Next(2, 5));
-        while (player.exp >= player.maxExp)
-        {
-            exp = exp - maxExp;
-            player.lv = player.lv + 1;
-            LvUp();
+        else 
+        { 
+            if (lucky < 20)
+            {
+                randDrop = enemy.droptable.item_Number[randDrop];
+                WriteLine("------------------------------------------------------------------------");
+                Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[randDrop - 1].Item_Name);
+                if (player.weapon == null)
+                {
+                    WearingWeapon(weaponList[randDrop - 1]);
+                }
+                else if (player.weapon != null)
+                {
+                    if (player.weapon.Damage < weaponList[randDrop - 1].Damage)
+                    {
+                        if (inventory.weapons.Count >= 20)
+                        {
+                            Write("장착중인 아이템이 자동판매 되었습니다. : ");
+                            player.credit += player.weapon.Sell_Price;
+                            WriteLine($"{player.weapon.Sell_Price}크레딧을 획득하셨습니다");
+                            WearingWeapon(weaponList[randDrop - 1]);
+                        }
+                        else
+                        {
+                            inventory.weapons.Add(weapon);
+                        }
+                    }
+                    else
+                    {
+                        if (inventory.weapons.Count >= 20)
+                        {
+                            Write("획득한 아이템을 판매합니다. : ");
+                            player.credit += weaponList[randDrop - 1].Sell_Price;
+                            WriteLine($"{weaponList[randDrop - 1].Sell_Price} 크레딧을 획득하셨습니다");
+                        }
+                        else
+                        {
+                            inventory.weapons.Add(weaponList[randDrop - 1]);
+                        }
+                    }
+                }
+            }
+            player.exp = exp + enemy.exp;
+            player.credit = player.credit + (enemy.exp * reWard.Next(2, 5));
+            while (player.exp >= player.maxExp)
+            {
+                exp = exp - maxExp;
+                player.lv = player.lv + 1;
+                LvUp();
+            }
         }
     }
     public void LvUp()                              // 레벨업 처리 메소드                              

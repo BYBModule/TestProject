@@ -29,11 +29,10 @@ class Enemy : Character
         this.exp = Exp;
         this.type = Type;
     }
+    // Character클래스의 ShowInfo를 상속
     public override void ShowInfo()
     {
-        Console.WriteLine("Damage : {0}\nName : {1}\nHp : {2}/{3}\nMp : {4}/{5}\nExp : {6}", this.damage, this.name, this.hp,
-                                                                                 this.maxHp, this.mp,
-                                                                                 this.maxMp, this.exp);
+        base.ShowInfo();
     }
     public override float SkillActive()                      // 랜덤으로 사용될 스킬을 출력
     {
