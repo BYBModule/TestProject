@@ -31,14 +31,13 @@ using static System.Console;
 // 데이터시트 추가
 // 몬스터 테이블추가
 // 무기 데이터 추가
-// 스킬 데이터 추가
+//스킬 데이터 추가
 // 드랍테이블 추가
 // - 입출력 부분 한 곳에 묶어서 정리(받아오는 데이터 : 몬스터, 드랍, 무기정보, 스킬, (가능하면 몬스터, 무기 데이터 추가))
 // - Player, Enemy클래스 겹치는부분 Character클래스 생성 및 상속
 // - Ingame 메서드 내용 분할
 // - 각 클래스 접근제한, 프로퍼티
-// 스킬 타입에 따라 다른 디메리트를 줌(스턴, 저주(공격력감소), 화상(도트데미지),
-//                                     흡혈(타격시 체력회복))
+// 스킬 타입에 따라 다른 디메리트를 줌(스턴, 저주(공격력감소), 화상(도트데미지), 흡혈(타격시 체력회복))
 // 현재까지 구현된 내용
 // =================================================================================================
 // (추가사항) 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
@@ -57,11 +56,11 @@ namespace TestCode
         {
             public List<T> DataIn(string dataSheet)
             {
-                StreamReader DataTable = new StreamReader($"./{dataSheet}.json");
-                string data = DataTable.ReadToEnd();
-                DataTable.Close();
-                List<T> dataList = new List<T>();
-                List<T> reData = new List<T>();
+                StreamReader DataTable = new StreamReader($"./{dataSheet}.json");           //.json 파일의 데이터를 읽습니다.
+                string data = DataTable.ReadToEnd();                                        // string형식으로 변환하여 저장합니다.
+                DataTable.Close();                                                          // 열려있는 .json파일을 닫습니다.
+                List<T> dataList = new List<T>();                                           // string형식의 데이터를 List형식으로 역직렬화합니다.
+                List<T> reData = new List<T>();                                             // 반환할 데이터에 데이터리스트를 저장합니다.
                 dataList = JsonSerializer.Deserialize<List<T>>(data);
                 for ( int i = 0; i < dataList.Count; i++)
                 {
@@ -74,14 +73,14 @@ namespace TestCode
         public static List<Enemy> Divide(List<Enemy> list, List<DropTable> drop, string Type)                   
         {
             List<Enemy> reData = new List<Enemy>();
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < list.Count; i++)                // 몬스터데이터를 매개변수의 타입에 맞게 저장합니다.
             {
                 if (list[i].Type == Type)
                 {
                     reData.Add(new Enemy(list[i].Damage, list[i].Name, list[i].MaxHp, list[i].MaxMp, list[i].Exp, list[i].Type));                  
                 }
             }
-            for (int i = 0; i < reData.Count; i++)
+            for (int i = 0; i < reData.Count; i++)              // 저장된 몬스터데이터의 드랍테이블을 연결합니다.
             {
                 for (int j = 0; j < drop.Count; j++)
                 {
@@ -101,23 +100,23 @@ namespace TestCode
             {
                 Write("플레이어 아이디를 입력해주세요 : ");
                 string input = ReadLine();
-                for (int i = 0; i < playerData.Count; i++)
+                for (int i = 0; i < playerData.Count; i++)      // 플레이어 데이터를 순회하며 입력값과 같은 아이디를 가진 세이브 데이터를 찾습니다.
                 {
-                    if (input == playerData[i].Name)
+                    if (input == playerData[i].Name)                
                     {
                         WriteLine("저장된 정보를 로드합니다.");
                         player = new Player(playerData[i].Name, playerData[i].Exp, playerData[i].Lv,
                                             playerData[i].Posion, playerData[i].Credit, playerData[i].Weapon_Number, playerData[i].ItemInventory);
-                        if (player.weapon_Number != 0)
+                        if (player.weapon_Number != 0)          // 저장된 플레이어 데이터에 무기착용 여부를 확인합니다.
                         {
-                            player.weapon = new Weapon();
+                            player.weapon = new Weapon(); 
                             player.weapon = weaponList[playerData[i].Weapon_Number - 1];
                             player.WearingWeapon(weaponList[playerData[i].Weapon_Number - 1]);
                         }
                         return player;
                     }
                 }
-                if (player.name == null)
+                if (player.name == null)                        // 플레이어 신규 생성
                 {
                     Write("해당 이름으로 아이디를 만드시겠습니까? 1. 예 2. 아니오 : ");
                     if (int.TryParse(ReadLine(), out inputnum))
@@ -149,11 +148,11 @@ namespace TestCode
         // 데이터 저장을 위한 메소드
         public static void PlayerLogout(List<Player> playerData, Player player, string saveFile)
         {
-            StreamWriter sw = new StreamWriter($"./{saveFile}.json", false);
+            StreamWriter sw = new StreamWriter($"./{saveFile}.json", false);        
             bool playerSave = false;
             for (int i = 0; i < playerData.Count; i++)
             {
-                if (playerData[i].Name == player.name)
+                if (playerData[i].Name == player.name)                              // 플레이어의 기존데이터가 있을경우 해당 데이터
                 {
                     playerData[i].Name = player.name;
                     playerData[i].Exp = player.exp;
@@ -165,7 +164,7 @@ namespace TestCode
                     playerSave = true;
                 }
             }
-            if (playerSave == false)
+            if (playerSave == false)                                                // 플레이어의 데이터가 새로 저장되어야 할 경우
             {
                 playerData.Add(new Player());
                 playerData[playerData.Count - 1].Name = player.name;
@@ -178,14 +177,14 @@ namespace TestCode
                 playerSave = true;
             }
             string save = JsonSerializer.Serialize(playerData);
-            sw.Write(save);
-            sw.Close();
+            sw.Write(save);                                                         // 파일 쓰기
+            sw.Close();                                                             // 파일 닫기
             return;
         }            
          // 배틀페이즈 처리
         public static void BattlePhase(List<Weapon> weaponList,Enemy enemy, Player player)
         {
-            Random critical = new Random();
+            Random critical = new Random();         // 치명타적용을 위한 변수선언
             int value;
             float skillDamage;
             WriteLine("------------------------------------------------------------------------");
@@ -193,7 +192,6 @@ namespace TestCode
             WriteLine("------------------------------------------------------------------------");
             while (true)
             {
-
                 if (player.playerTurn == true)
                 {
                     player.ShowInfo();
@@ -202,23 +200,23 @@ namespace TestCode
                     if (int.TryParse(ReadLine(), out value))
                     {
                         WriteLine("\n------------------------------------------------------------------------");
-                        if (value == 1)
+                        if (value == 1)                     // 공격
                         {
-                            if (10 > critical.Next(0, 100))
+                            if (10 > critical.Next(0, 100)) // 10%확률의 치명타
                             {
                                 WriteLine("치명타 발생!");
                                 enemy.hp = enemy.hp - (player.damage * 2);
                                 WriteLine("{0}의 데미지를 입혔습니다.", (player.damage * 2));
                             }
-                            else
+                            else                            // 일반공격                   
                             {
                                 enemy.hp = enemy.hp - player.damage;
                                 WriteLine("{0}의 데미지를 입혔습니다.", (player.damage));
                             }
                         }
-                        else if (value == 2)
+                        else if (value == 2)                // 포션사용
                         {
-                            if (player.posion > 0)
+                            if (player.posion > 0)          // 현재 플레이어가 보유하고 있는 포션의 개수를 체크합니다.
                             {
                                 if (player.hp + (player.maxHp / 2) <= player.hp)
                                 {
@@ -227,7 +225,7 @@ namespace TestCode
                                     player.posion = player.posion - 1;
                                     WriteLine("사용 가능한 포션은 {0}개 입니다", player.posion);
                                 }
-                                else
+                                else                        // 회복되는 체력이 플레이어의 최대체력을 넘어갈 때
                                 {
                                     WriteLine("{0}의 체력을 회복시켰습니다.", (player.maxHp - player.hp));
                                     player.hp = player.maxHp;
@@ -241,22 +239,22 @@ namespace TestCode
                                 continue;
                             }
                         }
-                        else if (value == 3)
+                        else if (value == 3)                // 스킬사용
                         {
-                            if (player.weapon != null)
+                            if (player.weapon != null)      // 플레이어가 무기를 들고있는지 체크합니다.
                             {
-                                if (player.mp >= 20)
+                                if (player.mp >= 20)        // 플레이어가 최소한의 스킬을 사용할 수 있는지 체크합니다.
                                 {
                                     skillDamage = player.SkillActive();
                                     if (skillDamage > 0)
                                     {
-                                        if (10 > critical.Next(0, 100))
+                                        if (10 > critical.Next(0, 100))     // 치명타 로직
                                         {
                                             WriteLine("치명타 발생!");
                                             enemy.hp = enemy.hp - (int)(player.damage * 2 * skillDamage);
                                             WriteLine("{0}의 데미지를 입혔습니다.", (int)(player.damage * 2 * skillDamage));
                                         }
-                                        else
+                                        else                                // 일반공격(스킬)
                                         {
                                             enemy.hp = enemy.hp - (int)(player.damage * skillDamage);
                                             WriteLine("{0}의 데미지를 입혔습니다.", (int)(player.damage * skillDamage));
@@ -280,13 +278,13 @@ namespace TestCode
                                 WriteLine("무기를 착용하지 않았습니다.");
                             }
                         }
-                        else if (value == 4)
+                        else if (value == 4)                                // 도망
                         {
-                            enemy.hp = enemy.maxHp;
-                            enemy.mp = 0;
+                            enemy.hp = enemy.maxHp;                         // 현재 적개체가 소모한 체력을 회복합니다
+                            enemy.mp = 0;                                   // 다음 전투 전 mp를 0으로 고정합니다.
                             WriteLine("전투에서 도망쳤습니다.");
                             WriteLine("------------------------------------------------------------------------");
-                            if (enemy.type == "보스")
+                            if (enemy.type == "보스")                       // 시련의 탑은 죽거나 클리어하지않으면 나갈 수 없기때문에 사망처리합니다.
                             {
                                 player.hp = 0;
                             }
@@ -305,7 +303,7 @@ namespace TestCode
                         WriteLine("숫자를 입력해주세요");
                         continue;
                     }
-                    if (player.deBurfCount > 0)
+                    if (player.deBurfCount > 0)             // 플레이어가 스킬을 사용했을 때 디버프가 적용되는 시간을 체크합니다.
                     {
                         if (player.deBurfType == "Burn")
                         {
@@ -314,7 +312,7 @@ namespace TestCode
                         }
                         if (player.deBurfType == "Curse")
                         {
-                            if (player.deBurfCount == 3)
+                            if (player.deBurfCount == 4)
                             {
                                 enemy.Curse();
                             }
@@ -325,11 +323,11 @@ namespace TestCode
                             player.deBurfCount -= 1;
                         }
                     }
-                    if (player.mp <= player.maxMp)
+                    if (player.mp <= player.maxMp)          // 플레이어의 턴이 끝날때 10의 마나를 회복합니다.
                     {
                         player.mp += 10;
                     }
-                    if (player.hitStun == true)
+                    if (player.hitStun == true)             // 플레이어가 스킬을 사용하여 몬스터에게 기절효과가 들어갔는지 체크합니다.
                     {
                         WriteLine("------------------------------------------------------------------------");
                         WriteLine("몬스터가 스턴상태입니다 해당 턴을 스킵합니다.");
@@ -342,20 +340,20 @@ namespace TestCode
                         player.playerTurn = false;
                     }
                 }
-                else if (player.playerTurn == false)
+                else if (player.playerTurn == false)        // 플레이어의 턴이 아닐때 몬스터는 자동으로 공격합니다.
                 {
                     WriteLine("------------------------------------------------------------------------");
-                    if (enemy.mp >= 40)
+                    if (enemy.mp >= 40)                     // 몬스터의 마나가 40이 될 때 자동으로 스킬을 사용합니다.
                     {
-                        skillDamage = enemy.SkillActive();
-                        if (10 > critical.Next(0, 100))
+                        skillDamage = enemy.SkillActive();  
+                        if (10 > critical.Next(0, 100))     // 몬스터의 치명타 로직
                         {
                             WriteLine("적의 치명타 발생!!!");
                             WriteLine("{0}의 데미지를 입었습니다.", (int)((enemy.damage * 2) * skillDamage));
                             player.hp = player.hp - (int)((enemy.damage * 2) * skillDamage);
                             enemy.mp = 0;
                         }
-                        else
+                        else                                
                         {
                             WriteLine("{0}의 데미지를 입었습니다.", (int)(enemy.damage * skillDamage));
                             player.hp = player.hp - (int)(enemy.damage * skillDamage);
@@ -364,23 +362,23 @@ namespace TestCode
                     }
                     else
                     {
-                        if (10 > critical.Next(0, 100))
+                        if (10 > critical.Next(0, 100))     // 몬스터의 치명타 로직
                         {
                             WriteLine("적의 치명타 발생!!!");
                             WriteLine("{0}의 데미지를 입었습니다.", (enemy.damage * 2));
                             player.hp = player.hp - (enemy.damage * 2);
                         }
-                        else
+                        else                                // 몬스터의 일반공격
                         {
                             WriteLine("{0}의 데미지를 입었습니다.", (enemy.damage));
                             player.hp = player.hp - enemy.damage;
                         }
                     }
-                    if (enemy.mp <= enemy.maxMp)
+                    if (enemy.mp <= enemy.maxMp)            // 공격을 한 후 10의 마나를 회복합니다.
                     {
                         enemy.mp += 10;
                     }
-                    if (enemy.deBurfCount > 0)
+                    if (enemy.deBurfCount > 0)              // 몬스터가 스킬을 사용한 이후 적용되야하는 디버프가있는지 확인합니다.
                     {
                         if (enemy.deBurfType == "Burn")
                         {
@@ -389,7 +387,7 @@ namespace TestCode
                         }
                         if (enemy.deBurfType == "Curse")
                         {
-                            if (enemy.deBurfCount == 3)
+                            if (enemy.deBurfCount == 4)
                             {
                                 player.Curse();
                             }
@@ -422,8 +420,14 @@ namespace TestCode
                     WriteLine("\n전투종료");
                     player.deBurfCount = 0;
                     enemy.deBurfCount = 0;
-                    player.damage = player.dummyDamage;
-                    enemy.damage = enemy.dummyDamage;
+                    if (player.dummyDamage > 0)
+                    {
+                        player.damage = player.dummyDamage;
+                    }
+                    if (enemy.dummyDamage > 0)
+                    {
+                        enemy.damage = enemy.dummyDamage;
+                    }
                     if (enemy.hp <= 0)
                     {
                         WriteLine("전투에서 승리했습니다.\n");

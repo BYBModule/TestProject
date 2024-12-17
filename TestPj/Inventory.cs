@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 class Inventory
 {
-    public static int itemCount = 0;
-    public List<Weapon> weapons = new List<Weapon>();
+    public static int itemCount = 0;                    // 현재 인벤토리에 저장된 아이템수를 받기위한 변수
+    public List<Weapon> weapons = new List<Weapon>();   // 인벤토리에 저장된 무기의 리스트
     public Inventory()
     {
 
     }
-    public int[] GetInventory()
+    public int[] GetInventory()                 // 인벤토리에 저장된 아이템의 배열을 받기위한 메소드
     {
         int[] result = new int[weapons.Count];
         for (int i = 0; i < weapons.Count; i++)
@@ -22,7 +22,7 @@ class Inventory
         }
         return result;
     }
-    public void InventoryInfo(Player player)
+    public void InventoryInfo(Player player)   // 인벤토리 정보를 처리하는 메소드
     {
         if (weapons != null)
         {

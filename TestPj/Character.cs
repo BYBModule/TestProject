@@ -6,40 +6,40 @@ using System.Threading.Tasks;
 
 class Character
 {
-    public string name;
-    public int damage;
-    public int maxHp;
-    public int hp;
-    public int maxMp;
-    public int mp;
-    public int exp;
-    public bool hitStun;
-    public int deBurfCount = 0;
-    public string deBurfType = "";
-    public int dummyDamage = 0;
+    public string name;                 // 이름
+    public int damage;                  // 데미지
+    public int maxHp;                   // 최대 체력
+    public int hp;                      // 체력
+    public int maxMp;                   // 최대 마나
+    public int mp;                      // 마나
+    public int exp;                     // 경험치
+    public bool hitStun;                // 스킬 사용 후 기절효과를 적용해야 하는지를 확인하기위한 변수입니다.
+    public int deBurfCount = 0;         // 디버프가 지속될 시간을 저장하는 변수입니다.
+    public string deBurfType = "";      // 스킬 사용 후 디버프의 타입을 저장할 변수입니다.
+    public int dummyDamage;             // 플레이어가 디버프로인해 감소된 공격력을 다시 할당하기위해 선언된 더미변수입니다.
     public Character()
     {
 
     }
 
-    public virtual void ShowInfo()
+    public virtual void ShowInfo()      // 정보 출력 메소드
     {
         Console.WriteLine("{0}\nDamage : {1}\nHp : {2}/{3}\nMp : {4}/{5}\nExp : {6}", this.name, this.damage, this.hp,
                                                                    this.maxHp, this.mp,
                                                                      this.maxMp, this.exp);
     }
-    public virtual bool IsAlive()
+    public virtual bool IsAlive()       // 캐릭터 개체의 생존여부를 확인하기위한 메소드
     {
         if(this.hp > 0)
             return true;
         return false;
     }
-    public virtual float SkillActive()                      // 사용될 스킬을 출력
+    public virtual float SkillActive()  // 사용한 스킬의 데미지를 출력하는 메소드
     {
         return 0;
     }
 
-    public string SType(Skill skill)
+    public string SType(Skill skill)    // 사용한 스킬의 타입에 따라 처리되는 메소드
     {
 
         if (skill.Skill_Type == "Normal")
@@ -51,7 +51,7 @@ class Character
         }
         else if(skill.Skill_Type == "Burn")
         {
-            deBurfCount = 5;
+            deBurfCount = 4;
             deBurfType = "Burn";
         }
         else if (skill.Skill_Type == "Stun")
@@ -88,9 +88,9 @@ class Character
     public void Drain()         // 회복
     {
         int dummy = this.hp;
-        if (this.hp + (this.damage / 10) < maxHp)
+        if (this.hp + (int)((this.damage * 1.2) / 10) < maxHp)
         {
-            this.hp = this.hp + (this.damage / 10);
+            this.hp = this.hp + (int)((this.damage * 1.2) / 10);
         }
         else
         {

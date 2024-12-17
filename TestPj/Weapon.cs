@@ -33,8 +33,8 @@ class Weapon
         this.Sell_Price = sell_Price;
         this.Item_Number = itemNumber;
     }
-    public void WeaponDataInfo()
+    public void WeaponDataInfo()    // 무기정보를 출력합니다 
     {
         Console.WriteLine($"아이템 명 : {Item_Name}\n\n공격력 : {Damage}\t무기타입 : {Weapon_Type}\n\n판매가격 : {Sell_Price}");
-    }           // 무기정보를 출력합니다
+    }           
 }

@@ -32,6 +32,7 @@ class Player : Character
     {
 
     }
+    // 새로 생성되는 데이터를 저장하는 생성자
     public Player(string name)
     {
         this.name = name;
@@ -45,7 +46,7 @@ class Player : Character
         this.exp = 0;
         this.lv = 1;
         this.itemInventory = null;
-    } // 새로 생성되는 데이터를 저장하는 생성자
+    } 
     public Player(string Name,int Exp, int Lv, int Posion,
                   int Credit, int Weapon_Number, int[] itemInventory) 
     {
