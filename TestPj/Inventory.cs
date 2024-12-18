@@ -9,6 +9,7 @@ class Inventory
 {
     public static int itemCount = 0;                    // 현재 인벤토리에 저장된 아이템수를 받기위한 변수
     public List<Weapon> weapons = new List<Weapon>();   // 인벤토리에 저장된 무기의 리스트
+    public List<Gear> gears = new List<Gear>();         // 인벤토리에 저장된 방어구의 리스트
     public Inventory()
     {
 

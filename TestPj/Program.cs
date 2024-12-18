@@ -41,11 +41,13 @@ using static System.Console;
 // 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
 // 현재까지 구현된 내용
 // =================================================================================================
-// (가능하면) 맵을 추가하여 맵형식으로 이동
-// (가능하면) 장비아이템과 장비창 추가
+// (가능하면) 장비아이템과 장비창 추가 Gear 클래스를 만들어 방어구를 추가함 4종(Head, Defense, Glove,Shoes)
+//            플레이어와 몬스터에게 방어력 구현, 특정 방어구의 세트옵션을 구현
 // (가능하면) 잡화상점, 장비상점 구현
+// (가능하면) 맵을 추가하여 맵형식으로 이동
 // (가능하면) 저장된 플레이어 데이터를 들고와 배틀페이즈 실행 (PvP)
 // (가능하면) For The King 형식의 선턴(행동주기 설정)추가
+// (추가사항) 몬스터리스트 필드클래스를 만들어 분할 
 namespace TestCode
 {
     internal class Program
@@ -514,13 +516,16 @@ namespace TestCode
                     }else if(lotation == 4)
                     {
                         int reWardCredit = 0;
-                        
+                        player.InTower = true;
+                        Random rand = new Random();
                         Enemy Dummy;
                         while (true)
                         {
                             if (killCount < 15)
                             {
-                                Dummy = bossList[new Random().Next(0, 2)];
+                                int swap = rand.Next(0, 2);
+                                Dummy = new Enemy(bossList[swap].damage, bossList[swap].name, bossList[swap].maxHp, 
+                                                  bossList[swap].maxMp, bossList[swap].exp, bossList[swap].type);
                                 for (int i = 0; i <= killCount; i++)
                                 {
                                     Dummy.maxHp += (int)Dummy.maxHp / 20;
@@ -531,6 +536,7 @@ namespace TestCode
                                 if (player.IsAlive() == false)
                                 {
                                     player.Dead();
+                                    player.InTower = false;
                                     break;
                                 }
                             }
@@ -580,21 +586,17 @@ namespace TestCode
                             if (killCount > 5 && killCount < 10)
                             {
                                 // 도전자무기 Ⅰ
-                                player.Reward(bossList[new Random().Next(0, 2)], player, weaponList);
+                                player.Reward(bossList[0], player, weaponList);
                             }
                             else if (killCount >= 10 && killCount < 15)
                             {
                                 // 도전자무기 Ⅱ
-                                player.Reward(bossList[new Random().Next(0, 2)], player, weaponList);
+                                player.Reward(bossList[1], player, weaponList);
                             }
                             else if( killCount == 15)
                             {
                                 WriteLine("최종보상을 획득하셨습니다.");
                                 player.Reward(bossList[bossChoice], player, weaponList);
-                            }
-                            else
-                            {
-                                continue;
                             }
                             WriteLine($"{reWardCredit} 크레딧을 획득하셨습니다.");
                             player.credit += reWardCredit;
@@ -602,6 +604,7 @@ namespace TestCode
                         else
                         {
                             WriteLine("탑을 오르는데 실패했습니다.");
+                            killCount = 0;
                             return;
                         }
                         killCount = 0;

@@ -18,7 +18,9 @@ class Player : Character
     public Inventory inventory;             // 플레이어의 인벤토리
     public int credit = 0;                  // 플레이어의 크레딧
     public List<Skill> skill;               // 사용할 스킬의 리스트
-    public bool playerTurn = true;
+    public bool playerTurn = true;          // 플레이어의 턴
+    public bool InTower = false;            // 타워 입장 유무
+    public List<Gear> gears;
     public string Name { get; set; }
     public int Exp { get; set; }
     public int Lv { get; set; }
@@ -115,24 +117,32 @@ class Player : Character
     } // 무기 착용여부를 확인하는 메소드
     public void Dead()// 플레이어 사망시 처리되는 메소드
     {
-        if (this.exp - (this.maxExp / 10) >= 0)
+        if (InTower == true)
         {
-            this.exp = this.exp - (this.maxExp / 10);
-            WriteLine($"{maxExp / 10}의 경험치를 잃었습니다.");
+            hp = maxHp;
+            return;
         }
         else
         {
-            WriteLine($"{exp}의 경험치를 잃었습니다.");
-            this.exp = 0;
+            if (this.exp - (this.maxExp / 10) >= 0)
+            {
+                this.exp = this.exp - (this.maxExp / 10);
+                WriteLine($"{maxExp / 10}의 경험치를 잃었습니다.");
+            }
+            else
+            {
+                WriteLine($"{exp}의 경험치를 잃었습니다.");
+                this.exp = 0;
+            }
+            hp = maxHp;
         }
-        hp = maxHp;
     }
     public void Reward(Enemy enemy, Player player, List<Weapon> weaponList)
     {
         Random reWard = new Random();
         int lucky = reWard.Next(0, 100);
         int randDrop = reWard.Next(0, enemy.droptable.item_Number.Length);
-        int drop = enemy.droptable.item_Number[0];
+        int drop = enemy.droptable.item_Number[reWard.Next(0,2)];
         if (enemy.type == "보스")
         {
             Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[drop].Item_Name);
