@@ -24,7 +24,7 @@ class Inventory
         }
         return result;
     }
-    public int[] GetGearInventory()
+    public int[] GetGearInventory()             // 인벤토리에 저장된 방어구 배열을 받기위한 메소드
     {
         int[] result = new int[gears.Count];
         for (int i = 0; i < gears.Count; i++)
@@ -32,7 +32,7 @@ class Inventory
             result[i] = gears[i].gItem_Number;
         }
         return result;
-    }
+    }           
     public void InventoryWeaponInfo(Player player)   // 인벤토리 정보를 처리하는 메소드
     {
         if (weapons.Count != 0)

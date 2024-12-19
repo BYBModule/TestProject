@@ -133,6 +133,7 @@ class Gear
 
         }
     }
+    // 기어의 정보를 출력하는 메소드
     public void gearDataInfo()
     {
         Console.WriteLine($"아이템 명 : {g_Name}\n\n방어력 : {defense}\t장착부위 : {type}\n\n판매가격 : {sell_Price}");

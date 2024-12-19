@@ -355,8 +355,11 @@ class Player : Character
                                 }
                                 else
                                 {
-                                    inventory.gears.Add(gears[i]);
                                     WearingGear(gearList[randDrop - 1], i);
+                                    if (gears[i].g_Name != "미착용")
+                                    {
+                                        inventory.gears.Add(gears[i]);
+                                    }
                                 }
                             }
                             else

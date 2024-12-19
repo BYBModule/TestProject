@@ -186,12 +186,12 @@ namespace TestCode
                     playerData[i].Posion = player.posion;
                     playerData[i].Credit = player.credit;
                     playerData[i].Weapon_Number = player.weapon_Number;
-                    playerData[i].gear_Number[0] = player.gear_Number[0];
-                    playerData[i].gear_Number[1] = player.gear_Number[1];
-                    playerData[i].gear_Number[2] = player.gear_Number[2];
-                    playerData[i].gear_Number[3] = player.gear_Number[3];
+                    playerData[i].Gear_Number[0] = player.gear_Number[0];
+                    playerData[i].Gear_Number[1] = player.gear_Number[1];
+                    playerData[i].Gear_Number[2] = player.gear_Number[2];
+                    playerData[i].Gear_Number[3] = player.gear_Number[3];
                     playerData[i].ItemInventory = player.inventory.GetInventory();
-                    playerData[i].gearInventory = player.inventory.GetGearInventory();
+                    playerData[i].GearInventory = player.inventory.GetGearInventory();
                     playerSave = true;
                 }
             }
@@ -204,12 +204,9 @@ namespace TestCode
                 playerData[playerData.Count - 1].Posion = player.posion;
                 playerData[playerData.Count - 1].Credit = player.credit;
                 playerData[playerData.Count - 1].Weapon_Number = player.weapon_Number;
-                playerData[playerData.Count - 1].gear_Number[0] = player.gear_Number[0];
-                playerData[playerData.Count - 1].gear_Number[1] = player.gear_Number[1];
-                playerData[playerData.Count - 1].gear_Number[2] = player.gear_Number[2];
-                playerData[playerData.Count - 1].gear_Number[3] = player.gear_Number[3];
+                playerData[playerData.Count - 1].Gear_Number = player.gear_Number;
                 playerData[playerData.Count - 1].ItemInventory = player.inventory.GetInventory();
-                playerData[playerData.Count - 1].gearInventory = player.inventory.GetGearInventory();
+                playerData[playerData.Count - 1].GearInventory = player.inventory.GetGearInventory();
                 playerSave = true;
             }
             string save = JsonSerializer.Serialize(playerData);
