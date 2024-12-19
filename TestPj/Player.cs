@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -12,8 +13,8 @@ class Player : Character
     public int maxExp;                      // 다음 레벨로 가기위한 경험치
     public bool wearing_Weapon = false;     // 아이템 착용 유무
     public int weapon_Number;               // 착용중인 무기의 고유번호
-    public int[] gear_Number = new int[4];               // 착용중인 방어구의 고유번호
-    public Weapon weapon = new Weapon();                   // 착용중인 무기의 데이터를 저장할 변수
+    public int[] gear_Number = new int[4];  // 착용중인 방어구의 고유번호
+    public Weapon weapon = new Weapon();    // 착용중인 무기의 데이터를 저장할 변수
     public int[] itemInventory;             // 인벤토리에 무기의 고유값을 저장하기 위한 배열
     public int[] gearInventory;             // 인벤토리에 방어구의 고유값을 저장하기 위한 배열
     //public Weapon Weapon { get; set; }    // 플레이어 무기 데이터값을 가져오기 위한 프로퍼티
@@ -22,9 +23,12 @@ class Player : Character
     public List<Skill> skill;               // 사용할 스킬의 리스트
     public bool playerTurn = true;          // 플레이어의 턴
     public bool InTower = false;            // 타워 입장 유무
+    public string setOption;                // 세트옵션의 이름을 저장합니다.
+    private bool setOn;                     // 장비 세트옵션이 켜져있는지 확인합니다.
     public List<Gear> gears = new List<Gear>(new Gear[4]);
 
-    public string Name { get; set; }
+    // 외부에서 플레이어데이터를 가져오고 저장하기위한 프로퍼티
+    public string Name { get; set; }        
     public int Exp { get; set; }
     public int Lv { get; set; }
     public int Posion { get; set; }
@@ -247,7 +251,7 @@ class Player : Character
                     }
                     else
                     {
-                        inventory.weapons.Add(weaponList[dropWeapon]);
+                        inventory.weapons.Add(weaponList[dropWeapon-1]);
                     }
                 }
             }
@@ -266,11 +270,13 @@ class Player : Character
                                 credit += gears[i].sell_Price;
                                 WriteLine($"{gears[i].sell_Price}크레딧을 획득하셨습니다");
                                 WearingGear(gearList[dropGear - 1], i);
+                                player.Set_Option();
                             }
                             else
                             {
                                 inventory.gears.Add(gears[i]);
                                 WearingGear(gearList[dropGear - 1], i);
+                                player.Set_Option();
                             }
                         }
                         else
@@ -283,9 +289,10 @@ class Player : Character
                             }
                             else
                             {
-                                inventory.gears.Add(gearList[dropGear]);
+                                inventory.gears.Add(gearList[dropGear - 1]);
                             }
                         }
+                        player.Set_Option();
                     }
                 }
             }
@@ -316,6 +323,7 @@ class Player : Character
                             }
                             else
                             {
+                                WearingWeapon(weaponList[randDrop - 1]);
                                 inventory.weapons.Add(weapon);
                             }
                         }
@@ -351,10 +359,12 @@ class Player : Character
                                     credit += gears[i].sell_Price;
                                     WriteLine($"{gears[i].sell_Price}크레딧을 획득하셨습니다");
                                     WearingGear(gearList[randDrop - 1], i);
+                                    player.Set_Option();
                                 }
                                 else
                                 {
                                     WearingGear(gearList[randDrop - 1], i);
+                                    player.Set_Option();
                                     if (gears[i].g_Name != "미착용")
                                     {
                                         inventory.gears.Add(gears[i]);
@@ -371,7 +381,7 @@ class Player : Character
                                 }
                                 else
                                 {
-                                    inventory.gears.Add(gearList[randDrop]);
+                                    inventory.gears.Add(gearList[randDrop - 1]);
                                 }
                             }
                         }
@@ -575,6 +585,242 @@ class Player : Character
         }
         WriteLine("장착한 무기가 없어서 사용할 수 없습니다.");
         return 0;
+    }
+    // 장비 4개를 모두 착용했을때 세트옵션을 처리하기위한 메소드(미구현Player.cs)
+    public void Set_Option()
+    {
+        
+        if (gears[0].grade != "Normal")
+        {
+            if (gears[0].grade == "Atlatis" || gears[1].grade == "Atlatis" || gears[2].grade == "Atlatis"
+                || gears[3].grade == "Atlatis")
+            {
+                setOn = false;
+                if (gears[0].g_Name == "세이렌의 머리장식" && gears[1].g_Name == "상어의 비늘 갑옷" &&
+                    gears[2].g_Name == "세이렌의 손장식" && gears[3].g_Name == "어인의 물갈퀴")
+                {
+                    setOn = true;
+                    // Atlantis 세트 효과
+                    Console.WriteLine("아틀란티스 세트를 사용하고 있습니다.");
+                    setOption = gears[0].grade;
+                }
+                IsSetOption();
+            }
+            else if (gears[0].grade == "Challenge" || gears[1].grade == "Challenge" || gears[2].grade == "Challenge" ||
+                     gears[3].grade == "Challenge")
+            {
+                setOn = false;
+                if (gears[0].g_Name == "도전자의 모자 Ⅰ" && gears[1].g_Name == "도전자의 갑옷 Ⅰ" &&
+                    gears[2].g_Name == "도전자의 장갑 Ⅰ" && gears[3].g_Name == "도전자의 신발 Ⅰ")
+                {
+                    setOn = true;
+                }
+                if (gears[0].g_Name == "도전자의 모자 Ⅱ" && gears[1].g_Name == "도전자의 갑옷 Ⅱ" &&
+                    gears[2].g_Name == "도전자의 장갑 Ⅱ" && gears[3].g_Name == "도전자의 신발 Ⅱ")
+                {
+                    setOn = true;
+                }
+                if (setOn)
+                {
+                    // 도전자 세트 효과
+                    Console.WriteLine("도전자 세트를 사용하고 있습니다.");
+                    setOption = gears[0].grade;
+                }
+                IsSetOption();
+            }
+            else if (gears[0].grade == "ForestKeeper" || gears[1].grade == "ForestKeeper" || gears[2].grade == "ForestKeeper" 
+                  || gears[3].grade == "ForestKeeper")
+            {
+                setOn = false;
+                if (gears[0].g_Name == "귀족의 상징" && gears[1].g_Name == "고급정장" &&
+                    gears[2].g_Name == "새하얀 장갑" && gears[3].g_Name == "화려한 신발")
+                {
+                    setOn = true;
+                }
+                else if (gears[0].g_Name == "여행자의 머리깃" && gears[1].g_Name == "저주를 노래하는 자의 옷" &&
+                         gears[2].g_Name == "닿지 않는 손바닥" && gears[3].g_Name == "버리지 못한 미련")
+                {
+                    setOn = true;
+
+                }
+                else if (gears[0].g_Name == "자아를 잃은자의 투구" && gears[1].g_Name == "파멸의 갑옷" &&
+                         gears[2].g_Name == "부서진 건틀릿" && gears[3].g_Name == "금이간 그리브")
+                {
+                    setOn = true;
+                }
+                if (setOn)
+                {
+                    // ForestKeeper 세트 효과
+                    Console.WriteLine("죽은 숲의 숲지기 세트를 사용하고 있습니다.");
+                    setOption = gears[0].grade;
+                }
+                IsSetOption();
+
+            }
+            else if (gears[0].grade == "DeathKnight" || gears[1].grade == "DeathKnight" || gears[2].grade == "DeathKnight" 
+                  || gears[3].grade == "DeathKnight")
+            {
+                if (gears[0].g_Name == "망령의 투구" && gears[1].g_Name == "망령의 갑옷" &&
+                    gears[2].g_Name == "망령의 장갑" && gears[3].g_Name == "망령의 신발")
+                {
+                    setOn = true;
+                    // DeathKnight 세트 효과
+                    Console.WriteLine("죽음의 기사 세트를 사용하고 있습니다.");
+                    setOption = gears[0].grade;
+                    IsSetOption();
+
+                }
+            }
+            else if (gears[0].grade == "Sylphid" || gears[1].grade == "Sylphid" || gears[2].grade == "Sylphid" || 
+                     gears[3].grade == "Sylphid")
+            {
+                if (gears[0].g_Name == "망령의 투구" && gears[1].g_Name == "망령의 갑옷" &&
+                  gears[2].g_Name == "망령의 장갑" && gears[3].g_Name == "망령의 신발")
+                {
+                    setOn = true;
+                    // Sylphid 세트 효과
+                    Console.WriteLine("바람과 함께하는 자 세트를 사용하고 있습니다.");
+                    setOption = gears[0].grade;
+                    IsSetOption();
+
+                }
+            }
+            else if (gears[0].grade == "DemonLord" || gears[1].grade == "DemonLord" || gears[2].grade == "DemonLord" || 
+                     gears[3].grade == "DemonLord")
+            {
+                if (gears[0].g_Name == "데몬로드 모자" && gears[1].g_Name == "데몬로드 갑옷" &&
+                    gears[2].g_Name == "데몬로드 장갑" && gears[3].g_Name == "데몬로드 신발")
+                {
+                    setOn = true;
+                    // DemonLord 세트효과
+                    Console.WriteLine("영원한 지배자 세트를 사용하고 있습니다.");
+                    setOption = gears[0].grade;
+                    IsSetOption();
+
+                }
+           }
+        }
+        else
+        {
+            setOn = false;
+            IsSetOption();
+
+        }
+    }
+    public void IsSetOption()
+    {
+        if (setOn)
+        {
+            if(setOption == "Atlantis")
+            {
+                this.defense = this.defense + 10;
+                this.damage = this.damage + 10;
+            }
+            else if (setOption == "Challenge")
+            {
+                this.defense = this.defense + 30;
+                this.damage = this.damage + 30;
+            }
+            else if (setOption == "ForestKeeper")
+            {
+                this.defense = this.defense + 40;
+                this.damage = this.damage + 40;
+            }
+            else if (setOption == "DeathKnight")
+            {
+                this.defense = this.defense - 80;
+                this.damage = this.damage + 120;
+            }
+            else if (setOption == "Sylphid")
+            {
+                this.defense = this.defense + 100;
+                this.damage = this.damage + 70;
+            }
+            else if (setOption == "DemonLord")
+            {
+                this.defense = this.defense + 60;
+                this.damage = this.damage + 90;
+            }
+        }
+        else if(!setOn)
+        {
+            if (setOption == "Atlantis")
+            {
+                this.defense = this.defense - 10;
+                this.damage = this.damage - 10;
+                setOption = "";
+                Console.WriteLine("아틀란티스 세트효과가 해제되었습니다.");
+            }
+            else if (setOption == "Challenge")
+            {
+                this.defense = this.defense - 30;
+                this.damage = this.damage - 30;
+                setOption = "";
+                Console.WriteLine("도전자 세트효과가 해제되었습니다.");
+            }
+            else if (setOption == "ForestKeeper")
+            {
+                this.defense = this.defense - 40;
+                this.damage = this.damage - 40;
+                setOption = "";
+                Console.WriteLine("죽은숲의 숲지기 세트효과가 해제되었습니다.");
+            }
+            else if (setOption == "DeathKnight")
+            {
+                this.defense = this.defense + 80;
+                this.damage = this.damage - 120;
+                setOption = "";
+                Console.WriteLine("죽음의 기사 세트효과가 해제되었습니다.");
+            }
+            else if (setOption == "Sylphid")
+            {
+                this.defense = this.defense - 100;
+                this.damage = this.damage - 70;
+                setOption = "";
+                Console.WriteLine("바람과 함께하는 자 세트효과가 해제되었습니다.");
+            }
+            else if (setOption == "DemonLord")
+            {
+                this.defense = this.defense - 60;
+                this.damage = this.damage - 90;
+                setOption = "";
+                Console.WriteLine("영원한 지배자 세트효과가 해제되었습니다.");
+            }
+        }
+    }
+    public void SetOptionInfo()
+    {
+        if (setOn)
+        {
+            if (setOption == "Atlantis")
+            {
+                Console.Write("\n아틀란티스");
+            }
+            else if (setOption == "Challenge")
+            {
+                Console.Write("\n도전자");
+            }
+            else if (setOption == "ForestKeeper")
+            {
+                Console.Write("\n죽은숲의 숲지기");
+            }
+            else if (setOption == "DeathKnight")
+            {
+                Console.Write("\n죽음의 기사");
+            }
+            else if (setOption == "Sylphid")
+            {
+                Console.Write("\n바람과 함께하는 자");
+            }
+            else if (setOption == "DemonLord")
+            {
+                Console.Write("\n영원한 지배자");
+            }
+        }
+        else
+        {
+            Console.Write("미적용");
+        }
     }
 
 }

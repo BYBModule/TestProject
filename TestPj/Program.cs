@@ -40,9 +40,9 @@ using static System.Console;
 // 스킬 타입에 따라 다른 디메리트를 줌(스턴, 저주(공격력감소), 화상(도트데미지), 흡혈(타격시 체력회복))
 // 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
 // 장비창 구현 및 플레이어와 몬스터에게 방어력 처리
+// 특정 방어구의 세트옵션을 구현
 // 현재까지 구현된 내용
 // =================================================================================================
-// (가능하면) 특정 방어구의 세트옵션을 구현
 // (가능하면) 소비템 추가, 잡화상점 추가
 // (가능하면) 강화 기능 추가
 // (가능하면) 저장된 플레이어 데이터를 들고와 배틀페이즈 실행 (PvP)
@@ -219,15 +219,15 @@ namespace TestCode
         public static void BattlePhase(List<Weapon> weaponList, List<Gear> gearList, Enemy enemy, Player player)
         {
             Random critical = new Random();         // 치명타적용을 위한 변수선언
-            int value;
-            float skillDamage;
-            int attackDamage;
+            int value;                              // 입력데이터를 처리하기위한 변수
+            float skillDamage;                      // 스킬로 증가되는 대미지 수치를 저장할 변수
+            int attackDamage;                       // 피해감소가 적용된 대미지 수치를 저장할 변수
             enemy.ShowInfo();
             while (true)
             {
                 if (player.playerTurn == true)
                 {
-                    attackDamage = (int)(player.damage - (player.damage * enemy.DamageReduced()) / 100);
+                    attackDamage = (int)(player.damage - (player.damage * enemy.DamageReduced()));
                     if (attackDamage == 0)
                     {
                         Console.WriteLine("적의 방어력이 너무 높습니다.");
@@ -242,7 +242,7 @@ namespace TestCode
                         if (value == 1)                     // 공격
                         {
                             
-                            if (10 > critical.Next(0, 100)) // 10%확률의 치명타
+                            if (10 > critical.Next(0, 99)) // 10%확률의 치명타
                             {
                                 WriteLine("치명타 발생!");
                                 enemy.hp = enemy.hp - (attackDamage * 2);
@@ -802,6 +802,7 @@ namespace TestCode
             }
             #endregion
             int lotation = 0;
+            player.Set_Option();
             while (true)
             {
                 player.ShowInfo();
@@ -842,12 +843,15 @@ namespace TestCode
                     }
                     else if(lotation == 2)
                     {
-                        Console.WriteLine($"------------------------------------------------------------------------\n      " +
+                        Console.Write($"------------------------------------------------------------------------\n      " +
                             $"착용무기      : {player.weapon.Item_Name}\n------------------------------------------------------------------------\n\t" +
                             $"모자        : {player.gears[0].g_Name}\n------------------------------------------------------------------------\n\t" +
                             $"갑옷        : {player.gears[1].g_Name}\n------------------------------------------------------------------------\n\t" +
                             $"장갑        : {player.gears[2].g_Name}\n------------------------------------------------------------------------\n\t" +
-                            $"신발        : {player.gears[3].g_Name}\n------------------------------------------------------------------------\n 추가행동(미구현)");
+                            $"신발        : {player.gears[3].g_Name}\n------------------------------------------------------------------------\n\t" +
+                            $"세트옵션    : ");
+                        player.SetOptionInfo();
+                        Console.WriteLine("\n------------------------------------------------------------------------\n\t" + "추가행동(미구현)");
                     }
                     else if (lotation == 3)
                     {

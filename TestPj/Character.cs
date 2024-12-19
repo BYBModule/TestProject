@@ -17,8 +17,8 @@ class Character
     public bool hitStun;                // 스킬 사용 후 기절효과를 적용해야 하는지를 확인하기위한 변수입니다.
     public int deBurfCount = 0;         // 디버프가 지속될 시간을 저장하는 변수입니다.
     public string deBurfType = "";      // 스킬 사용 후 디버프의 타입을 저장할 변수입니다.
-    public int dummyDamage;             // 플레이어가 디버프로인해 감소된 공격력을 다시 할당하기위해 선언된 더미변수입니다.
-    public int defense = 0;                     // 방어력
+    public int dummyDamage;             // 플레이어가 디버프로 인해 감소된 공격력을 다시 할당하기위해 선언된 더미변수입니다.
+    public int defense = 0;             // 방어력
     public float damageReduced;         // 피해감소 수치
     public Character()
     {
@@ -70,7 +70,7 @@ class Character
         }
         return deBurfType;
     }
-    public void Burn()          // 일정시간 지속적으로 피해를 입음
+    public void Burn()                  // 일정시간 지속적으로 피해를 입음
     {
         Console.WriteLine("몸이 불타 체력이 서서히 감소합니다.");
         if (this.hp < this.hp - (this.maxHp / 10))
@@ -83,14 +83,14 @@ class Character
         }
         this.hp = this.hp - (this.maxHp / 10);
     }
-    public void Curse()         // 공격력 감소
+    public void Curse()                 // 공격력 감소
     {
         this.dummyDamage = this.damage;
         Console.WriteLine("저주에 걸려 공격력이 감소합니다.");
-        Console.WriteLine($"공격력이 {this.damage - this.damage / 10} 감소합니다.");
+        Console.WriteLine($"공격력이 {this.damage / 10} 감소합니다.");
         this.damage = this.damage - this.damage / 10;
     }
-    public void Drain()         // 회복
+    public void Drain()                 // 회복
     {
         int dummy = this.hp;
         if (this.hp + (int)((this.damage * 1.2) / 10) < maxHp)
@@ -103,7 +103,7 @@ class Character
         }
         Console.WriteLine($"{this.hp - dummy} 만큼 회복되었습니다.");
     }
-    public float DamageReduced()
+    public float DamageReduced()        // 캐릭터의 방어력으로 피해감소 수치를 처리할 메소드
     {
         if(this.defense <= 100)
         {
@@ -113,6 +113,6 @@ class Character
         {
             damageReduced = 50 + (this.defense - 100) / 4;
         }
-        return damageReduced;
+        return damageReduced/100;
     }
 }

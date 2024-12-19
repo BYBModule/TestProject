@@ -15,7 +15,7 @@ class Inventory
     {
 
     }
-    public int[] GetInventory()                 // 인벤토리에 저장된 아이템의 배열을 받기위한 메소드
+    public int[] GetInventory()                     // 인벤토리에 저장된 아이템의 배열을 받기위한 메소드
     {
         int[] result = new int[weapons.Count];
         for (int i = 0; i < weapons.Count; i++)
@@ -24,7 +24,7 @@ class Inventory
         }
         return result;
     }
-    public int[] GetGearInventory()             // 인벤토리에 저장된 방어구 배열을 받기위한 메소드
+    public int[] GetGearInventory()                 // 인벤토리에 저장된 방어구 배열을 받기위한 메소드
     {
         int[] result = new int[gears.Count];
         for (int i = 0; i < gears.Count; i++)
@@ -33,7 +33,7 @@ class Inventory
         }
         return result;
     }           
-    public void InventoryWeaponInfo(Player player)   // 인벤토리 정보를 처리하는 메소드
+    public void InventoryWeaponInfo(Player player)  // 인벤토리 정보를 처리하는 메소드
     {
         if (weapons.Count != 0)
         {
@@ -141,7 +141,7 @@ class Inventory
             Console.WriteLine("아이템이 없습니다.");
         }
     }
-    public void InventoryGearInfo(Player player)   // 인벤토리 정보를 처리하는 메소드
+    public void InventoryGearInfo(Player player)    // 인벤토리 정보를 처리하는 메소드
     {
         if (gears.Count != 0)
         {
@@ -242,12 +242,14 @@ class Inventory
                                             temp = player.gears[i];
                                             player.WearingGear(gears[itIndex - 1], i);
                                             gears[itIndex - 1] = temp;
+                                            player.Set_Option();
                                             break;
                                         }
                                         else
                                         {
                                             player.WearingGear(gears[itIndex - 1], i);
                                             gears.Remove(gears[itIndex - 1]);
+                                            player.Set_Option();
                                             break;
                                         }
                                     }
