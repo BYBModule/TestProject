@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +18,8 @@ class Character
     public int deBurfCount = 0;         // 디버프가 지속될 시간을 저장하는 변수입니다.
     public string deBurfType = "";      // 스킬 사용 후 디버프의 타입을 저장할 변수입니다.
     public int dummyDamage;             // 플레이어가 디버프로인해 감소된 공격력을 다시 할당하기위해 선언된 더미변수입니다.
+    public int defense = 0;                     // 방어력
+    public float damageReduced;         // 피해감소 수치
     public Character()
     {
 
@@ -25,9 +28,9 @@ class Character
     public virtual void ShowInfo()      // 정보 출력 메소드
     {
         Console.WriteLine("------------------------------------------------------------------------");
-        Console.WriteLine("{0}\nDamage : {1}\nHp : {2}/{3}\nMp : {4}/{5}\nExp : {6}", this.name, this.damage, this.hp,
+        Console.WriteLine("{0}\nDamage : {1}\t Defense : {7}\nHp : {2}/{3}\nMp : {4}/{5}\nExp : {6}", this.name, this.damage, this.hp,
                                                                    this.maxHp, this.mp,
-                                                                     this.maxMp, this.exp);
+                                                                     this.maxMp, this.exp, this.defense);
         Console.WriteLine("------------------------------------------------------------------------");
     }
     public virtual bool IsAlive()       // 캐릭터 개체의 생존여부를 확인하기위한 메소드
@@ -99,5 +102,17 @@ class Character
             this.hp = maxHp;
         }
         Console.WriteLine($"{this.hp - dummy} 만큼 회복되었습니다.");
+    }
+    public float DamageReduced()
+    {
+        if(this.defense <= 100)
+        {
+            damageReduced = this.defense / 2;
+        }
+        else
+        {
+            damageReduced = 50 + (this.defense - 100) / 4;
+        }
+        return damageReduced;
     }
 }

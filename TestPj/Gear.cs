@@ -23,7 +23,6 @@ class Gear
     public string type;            // Head, Defense, Glove, Shoes 4종(각각 리스트 0, 1, 2, 3에 할당)
     public string grade;            // 아이템의 등급을받아 처리하는 변수
     public int gItem_Number;         // 아이템 번호
-    public float damageReduced;     // 피해감소 수치
 
     public Gear()
     {
@@ -138,5 +137,6 @@ class Gear
     {
         Console.WriteLine($"아이템 명 : {g_Name}\n\n방어력 : {defense}\t장착부위 : {type}\n\n판매가격 : {sell_Price}");
     }
+
 }
 

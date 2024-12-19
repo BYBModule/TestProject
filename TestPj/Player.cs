@@ -10,7 +10,6 @@ class Player : Character
     public int lv;                          // 플레이어의 레벨을 저장할 변수
     public int posion;                      // 플레이어가 소지하고 있는 포션의 개수
     public int maxExp;                      // 다음 레벨로 가기위한 경험치
-    public int defense = 0;                     // 방어력
     public bool wearing_Weapon = false;     // 아이템 착용 유무
     public int weapon_Number;               // 착용중인 무기의 고유번호
     public int[] gear_Number = new int[4];               // 착용중인 방어구의 고유번호

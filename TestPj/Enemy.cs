@@ -11,17 +11,19 @@ class Enemy : Character
     public int Damage { get; set; } // 외부 데이터에서 데미지값을 받기위한 프로퍼티  
     public int MaxHp { get; set; }  // 외부 데이터에서 최대체력값을 받기위한 프로퍼티
     public int MaxMp { get; set; }  // 외부 데이터에서 최대마나값을 받기위한 프로퍼티
-    public string Name { get; set; }// 외부 데이터에서 몬스터의 이름을 받기위한 프로퍼티
     public int Exp { get; set; }    // 외부 데이터에서 몬스터의 경험치를 받기위한 프로퍼티
+    public int Defense {  get; set; }// 외부 데이터에서 몬스터의 방어력을 받기위한 프로퍼티
+    public string Name { get; set; }// 외부 데이터에서 몬스터의 이름을 받기위한 프로퍼티
     public string Type { get; set; }// 외부에서 몬스터의 타입을 받기위한 프로퍼티
 
     public Enemy()
     {
     }
-    public Enemy(int Damage, string Name, int MaxHp, int MaxMp, int Exp, string Type)
+    public Enemy(int Damage, string Name, int Defense, int MaxHp, int MaxMp, int Exp, string Type)
     {
         this.damage = Damage;
         this.name = Name;
+        this.defense = Defense;
         this.maxHp = MaxHp;
         this.hp = MaxHp;
         this.maxMp = MaxMp;

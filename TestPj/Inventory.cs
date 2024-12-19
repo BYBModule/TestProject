@@ -169,8 +169,9 @@ class Inventory
             }
             while (true)
             {
+                int itIndex;
                 Console.Write("방어구의 정보를 확인 하겠습니까?  0. 뒤로가기 : ");
-                int itIndex = int.Parse(Console.ReadLine());
+                if(int.TryParse(Console.ReadLine(), out itIndex))
                 {
                     if (itIndex > 0 && itIndex <= 40)
                     {
@@ -193,72 +194,92 @@ class Inventory
                         return;
                     }
                 }
-                Console.Write("1. 다른 칸 확인하기 2. 착용 3. 판매 4. 나가기 : ");
-                int index = int.Parse(Console.ReadLine());
-                if (index == 1)
+                else 
                 {
+                    Console.WriteLine("잘못 입력 하셨습니다. 다시입력해주세요");
                     continue;
                 }
-                else if (index == 2)
+                Console.Write("1. 다른 칸 확인하기 2. 착용 3. 판매 4. 나가기 : ");
+                int index;
+                if (int.TryParse(Console.ReadLine(), out index))
                 {
-                    int type;
-                    for (int i = 0; i < player.gears.Count; i++)
-                    {
-                        if (player.gears[i].g_Name != "미착용" && gears[itIndex - 1].type == player.gears[i].type)
-                        {
-                            if (gears[itIndex - 1].defense >= player.gears[i].defense)
-                            {
-                                Console.WriteLine($"\n지금 사용 중인 방어구보다 방어력이 {gears[itIndex - 1].defense - player.gears[i].defense} 증가합니다.");
-                            }
-                            else
-                            {
-                                Console.WriteLine($"\n지금 사용 중인 방어구보다 방어력이 {player.gears[i].defense - gears[itIndex - 1].defense} 감소합니다.");
-                            }
-                            type = i;
-                            break;
-                        }
-                    }
-                        Console.WriteLine("\n정말 착용하시겠습니까? 1. 착용 2. 돌아가기");
-                        index = int.Parse(Console.ReadLine());
                     if (index == 1)
                     {
-                        for (int i = 0; i < player.gears.Count; i++)
-                        {
-                            if (gears[itIndex - 1].type == player.gears[i].type)
-                            {
-                                if (player.gears[i].g_Name != "미착용")
-                                {
-                                    Gear temp = new Gear();
-                                    temp = player.gears[i];
-                                    player.WearingGear(gears[itIndex - 1], i);
-                                    gears[itIndex - 1] = temp;
-                                    break;
-                                }
-                                else
-                                {
-                                    player.WearingGear(gears[itIndex - 1], i);
-                                    gears.Remove(gears[itIndex - 1]);
-                                    break;
-                                }
-                            }
-                        }
+                        continue;
                     }
                     else if (index == 2)
                     {
+                        int type;
+                        int index2;
+                        for (int i = 0; i < player.gears.Count; i++)
+                        {
+                            if (player.gears[i].g_Name != "미착용" && gears[itIndex - 1].type == player.gears[i].type)
+                            {
+                                if (gears[itIndex - 1].defense >= player.gears[i].defense)
+                                {
+                                    Console.WriteLine($"\n지금 사용 중인 방어구보다 방어력이 {gears[itIndex - 1].defense - player.gears[i].defense} 증가합니다.");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"\n지금 사용 중인 방어구보다 방어력이 {player.gears[i].defense - gears[itIndex - 1].defense} 감소합니다.");
+                                }
+                                type = i;
+                                break;
+                            }
+                        }
+                        Console.WriteLine("\n정말 착용하시겠습니까? 1. 착용 2. 돌아가기");
+                        if (int.TryParse(Console.ReadLine(), out index2))
+                        {
+                            if (index2 == 1)
+                            {
+                                for (int i = 0; i < player.gears.Count; i++)
+                                {
+                                    if (gears[itIndex - 1].type == player.gears[i].type)
+                                    {
+                                        if (player.gears[i].g_Name != "미착용")
+                                        {
+                                            Gear temp = new Gear();
+                                            temp = player.gears[i];
+                                            player.WearingGear(gears[itIndex - 1], i);
+                                            gears[itIndex - 1] = temp;
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            player.WearingGear(gears[itIndex - 1], i);
+                                            gears.Remove(gears[itIndex - 1]);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            else if (index2 == 2)
+                            {
+                                return;
+                            }
+                        }else
+                        {
+                            Console.WriteLine("잘못입력했습니다");
+                            return;
+                        }
+
+                    }
+                    else if (index == 3)
+                    {
+                        Console.WriteLine("------------------------------------------------------------------------");
+                        Console.WriteLine($"{gears[itIndex - 1].sell_Price} 크레딧을 획득하셨습니다.");
+                        player.credit += gears[itIndex - 1].sell_Price;
+                        gears.Remove(gears[itIndex - 1]);
+                        break;
+                    }
+                    else if (index == 4)
+                    {
                         return;
                     }
-                    
                 }
-                else if (index == 3)
+                else
                 {
-                    Console.WriteLine("------------------------------------------------------------------------");
-                    Console.WriteLine($"{gears[itIndex - 1].sell_Price} 크레딧을 획득하셨습니다.");
-                    player.credit += gears[itIndex - 1].sell_Price;
-                    gears.Remove(gears[itIndex - 1]);
-                    break;
-                }
-                else if (index == 4)
-                {
+                    Console.WriteLine("잘못입력했습니다");
                     return;
                 }
             }
