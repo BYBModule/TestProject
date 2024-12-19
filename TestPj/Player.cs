@@ -10,17 +10,21 @@ class Player : Character
     public int lv;                          // 플레이어의 레벨을 저장할 변수
     public int posion;                      // 플레이어가 소지하고 있는 포션의 개수
     public int maxExp;                      // 다음 레벨로 가기위한 경험치
+    public int defense = 0;                     // 방어력
     public bool wearing_Weapon = false;     // 아이템 착용 유무
     public int weapon_Number;               // 착용중인 무기의 고유번호
-    public Weapon weapon;                   // 착용중인 무기의 데이터를 저장할 변수
-    public int[] itemInventory;             // 인벤토리에 아이템의 고유값을 저장하기위한 배열
+    public int[] gear_Number = new int[4];               // 착용중인 방어구의 고유번호
+    public Weapon weapon = new Weapon();                   // 착용중인 무기의 데이터를 저장할 변수
+    public int[] itemInventory;             // 인벤토리에 무기의 고유값을 저장하기 위한 배열
+    public int[] gearInventory;             // 인벤토리에 방어구의 고유값을 저장하기 위한 배열
     //public Weapon Weapon { get; set; }    // 플레이어 무기 데이터값을 가져오기 위한 프로퍼티
     public Inventory inventory;             // 플레이어의 인벤토리
     public int credit = 0;                  // 플레이어의 크레딧
     public List<Skill> skill;               // 사용할 스킬의 리스트
     public bool playerTurn = true;          // 플레이어의 턴
     public bool InTower = false;            // 타워 입장 유무
-    public List<Gear> gears;
+    public List<Gear> gears = new List<Gear>(new Gear[4]);
+
     public string Name { get; set; }
     public int Exp { get; set; }
     public int Lv { get; set; }
@@ -28,7 +32,9 @@ class Player : Character
     public int Credit { get; set; }
     public int MaxExp { get; set; }
     public int Weapon_Number { get; set; }
+    public int[] Gear_Number { get; set; }
     public int[] ItemInventory { get; set; }
+    public int[] GearInventory { get; set; }
 
     public Player()
     {
@@ -50,7 +56,7 @@ class Player : Character
         this.itemInventory = null;
     } 
     public Player(string Name,int Exp, int Lv, int Posion,
-                  int Credit, int Weapon_Number, int[] itemInventory) 
+                  int Credit, int Weapon_Number, int[] gear_Number, int[] itemInventory, int[] gearInventory) 
     {
         this.lv = Lv;
         if (Lv > 1)
@@ -74,27 +80,34 @@ class Player : Character
         this.exp = Exp;
         this.credit = Credit;
         this.weapon_Number = Weapon_Number;
+        this.gear_Number = gear_Number;
         this.itemInventory = itemInventory;
+        this.gearInventory = gearInventory;
     }
     
     public override void ShowInfo()                 // 플레이어 정보 출력
     {
         if (wearing_Weapon == true)
         {
-            WriteLine("Lv : {0} Player : {1}\nDamage : {2}\nHp : {3}/{4}\nMp : {5}/{6}\nExp : {7}/{8}\n소지금액 : {9}\n포션 : {10}개", this.lv, this.name, this.damage, this.hp,
+            Console.WriteLine("------------------------------------------------------------------------");
+            WriteLine("Lv : {0} Player : {1}\nDamage : {2}\tDefense : {11}\nHp : {3}/{4}\nMp : {5}/{6}\nExp : {7}/{8}\n소지금액 : {9}\n포션 : {10}개", this.lv, this.name, this.damage, this.hp,
                                                                                this.maxHp, this.mp,
                                                                                  this.maxMp, this.exp, this.maxExp, this.credit,
-                                                                                 this.posion);
-            WriteLine($"착용 장비 : {weapon.Item_Name}");
+                                                                                 this.posion, this.defense);
+            WriteLine($"착용 무기 : {weapon.Item_Name}");
+            Console.WriteLine("------------------------------------------------------------------------");
         }
         else
         {
-            WriteLine("Lv : {0} Player : {1}\nDamage : {2}\nHp : {3}/{4}\nMp : {5}/{6}\nExp : {7}/{8}\n소지금액 : {9}\n포션 : {10}개", this.lv, this.name, this.damage, this.hp,
+            Console.WriteLine("------------------------------------------------------------------------");
+            WriteLine("Lv : {0} Player : {1}\nDamage : {2}\tDefense : {11}\nHp : {3}/{4}\nMp : {5}/{6}\nExp : {7}/{8}\n소지금액 : {9}\n포션 : {10}개", this.lv, this.name, this.damage, this.hp,
                                                                                this.maxHp, this.mp,
                                                                                  this.maxMp, this.exp, this.maxExp, this.credit,
-                                                                                 this.posion);
+                                                                                 this.posion, this.defense);
+            Console.WriteLine("------------------------------------------------------------------------");
         }
     }
+    // 무기 착용시 데미지증감을 적용하는 메소드
     public void WearingWeapon(Weapon weapon)
     {
         if (weapon != null)
@@ -114,7 +127,67 @@ class Player : Character
             }
             wearing_Weapon = true;
         }
-    } // 무기 착용여부를 확인하는 메소드
+    }
+    // 방어구 착용시 방어력증감을 적용하는 메소드
+    public void WearingGear(Gear gear, int typeIndex)
+    {
+        if (gears[typeIndex].g_Name == "미착용")
+        {
+            this.defense = this.defense + gear.defense;
+            this.gears[typeIndex] = gear;
+        }
+        else
+        {
+            this.defense = this.defense - gears[typeIndex].defense + gear.defense;
+            this.gears[typeIndex] = gear;
+        }
+
+        this.gear_Number[typeIndex] = gear.gItem_Number;
+    }
+    // 방어구 착용 여부를 확인하는 메소드
+    public void IsWearingGear()
+    {
+        if (this.gears[0].type != "Head")
+        {
+            if (this.gears[0].type != "")
+            {
+                WriteLine("머리가 잘못입력됬습니다.");
+                this.gears[0] = new Gear();
+                WearingGear(gears[0], 0);
+                this.gear_Number[0] = 0;
+            }
+        }
+        if(this.gears[1].type != "Armor")
+        {
+            if (this.gears[1].type != "")
+            {
+                WriteLine("방어구가 잘못입력됬습니다.");
+                this.gears[1] = new Gear();
+                WearingGear(gears[1], 1);
+                this.gear_Number[1] = 0;
+            }
+        }
+        if (this.gears[2].type != "Glove")
+        {
+            if (this.gears[2].type != "")
+            {
+                WriteLine("장갑이 잘못입력됬습니다.");
+                this.gears[2] = new Gear();
+                WearingGear(gears[2], 2);
+                this.gear_Number[2] = 0;
+            }
+        }
+        if (this.gears[3].type != "Shoes")
+        {
+            if (this.gears[3].type != "")
+            {
+                WriteLine("신발이 잘못입력됬습니다.");
+                this.gears[3] = new Gear();
+                WearingGear(gears[3], 3);
+                this.gear_Number[3] = 0;
+            }
+        }
+    }
     public void Dead()// 플레이어 사망시 처리되는 메소드
     {
         if (InTower == true)
@@ -137,82 +210,168 @@ class Player : Character
             hp = maxHp;
         }
     }
-    public void Reward(Enemy enemy, Player player, List<Weapon> weaponList)
+    public void Reward(Enemy enemy, Player player, List<Weapon> weaponList, List<Gear> gearList)
     {
         Random reWard = new Random();
         int lucky = reWard.Next(0, 100);
         int randDrop = reWard.Next(0, enemy.droptable.item_Number.Length);
-        int drop = enemy.droptable.item_Number[reWard.Next(0,2)];
+        int dropWeapon = enemy.droptable.item_Number[reWard.Next(0, enemy.droptable.item_Number.Length)];
+        int dropGear = enemy.droptable.GItem_Number[reWard.Next(0, enemy.droptable.GItem_Number.Length)];
+        int dropType = reWard.Next(0, 2) % 2;
         if (enemy.type == "보스")
         {
-            Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[drop].Item_Name);
-            if (player.weapon.Damage < weaponList[drop].Damage)
+            if (dropType == 0)
             {
-                if (inventory.weapons.Count >= 20)
+                Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[dropWeapon - 1].Item_Name);
+                if (player.weapon.Damage < weaponList[dropWeapon - 1].Damage)
                 {
-                    Write("장착중인 아이템이 자동판매 되었습니다. : ");
-                    credit += weapon.Sell_Price;
-                    WriteLine($"{weapon.Sell_Price}크레딧을 획득하셨습니다");
-                    WearingWeapon(weaponList[drop]);
+                    if (inventory.weapons.Count >= 20)
+                    {
+                        Write("장착중인 아이템이 자동판매 되었습니다. : ");
+                        credit += weapon.Sell_Price;
+                        WriteLine($"{weapon.Sell_Price}크레딧을 획득하셨습니다");
+                        WearingWeapon(weaponList[dropWeapon - 1]);
+                    }
+                    else
+                    {
+                        inventory.weapons.Add(weapon);
+                        WearingWeapon(weaponList[dropWeapon - 1]);
+                    }
                 }
                 else
                 {
-                    inventory.weapons.Add(weapon);
-                    WearingWeapon(weaponList[drop]);
+                    if (inventory.weapons.Count >= 20)
+                    {
+                        Write("획득한 아이템을 판매합니다. : ");
+                        credit += weaponList[dropWeapon - 1].Sell_Price;
+                        WriteLine($"{weaponList[dropWeapon - 1].Sell_Price} 크레딧을 획득하셨습니다");
+                    }
+                    else
+                    {
+                        inventory.weapons.Add(weaponList[dropWeapon]);
+                    }
                 }
             }
             else
             {
-                if (inventory.weapons.Count >= 20)
+                Console.WriteLine("아이템을 획득하셨습니다. : {0}", gearList[dropGear - 1].g_Name);
+                for (int i = 0; i < player.gears.Count; i++)
                 {
-                    Write("획득한 아이템을 판매합니다. : ");
-                    credit += weaponList[drop].Sell_Price;
-                    WriteLine($"{weaponList[drop].Sell_Price} 크레딧을 획득하셨습니다");
-                }
-                else
-                {
-                    inventory.weapons.Add(weaponList[drop]);
+                    if (player.gears[i].type == gearList[dropGear - 1].type)
+                    {
+                        if (player.gears[i].defense < gearList[dropGear - 1].defense)
+                        {
+                            if (inventory.gears.Count >= 40)
+                            {
+                                Write("장착중인 아이템이 자동판매 되었습니다. : ");
+                                credit += gears[i].sell_Price;
+                                WriteLine($"{gears[i].sell_Price}크레딧을 획득하셨습니다");
+                                WearingGear(gearList[dropGear - 1], i);
+                            }
+                            else
+                            {
+                                inventory.gears.Add(gears[i]);
+                                WearingGear(gearList[dropGear - 1], i);
+                            }
+                        }
+                        else
+                        {
+                            if (inventory.gears.Count >= 40)
+                            {
+                                Write("획득한 아이템을 판매합니다. : ");
+                                credit += gearList[dropGear - 1].sell_Price;
+                                WriteLine($"{gearList[dropGear - 1].sell_Price} 크레딧을 획득하셨습니다");
+                            }
+                            else
+                            {
+                                inventory.gears.Add(gearList[dropGear]);
+                            }
+                        }
+                    }
                 }
             }
         }
         else 
-        { 
-            if (lucky < 20)
+        {
+            if (lucky < 100)
             {
-                randDrop = enemy.droptable.item_Number[randDrop];
-                WriteLine("------------------------------------------------------------------------");
-                Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[randDrop - 1].Item_Name);
-                if (player.weapon == null)
+                if (dropType == 0)
                 {
-                    WearingWeapon(weaponList[randDrop - 1]);
-                }
-                else if (player.weapon != null)
-                {
-                    if (player.weapon.Damage < weaponList[randDrop - 1].Damage)
+                    randDrop = enemy.droptable.item_Number[randDrop];
+                    WriteLine("------------------------------------------------------------------------");
+                    Console.WriteLine("아이템을 획득하셨습니다. : {0}", weaponList[randDrop - 1].Item_Name);
+                    if (player.weapon.Item_Name == "미착용")
                     {
-                        if (inventory.weapons.Count >= 20)
+                        WearingWeapon(weaponList[randDrop - 1]);
+                    }
+                    else if (player.weapon.Item_Name != "미착용")
+                    {
+                        if (player.weapon.Damage < weaponList[randDrop - 1].Damage)
                         {
-                            Write("장착중인 아이템이 자동판매 되었습니다. : ");
-                            player.credit += player.weapon.Sell_Price;
-                            WriteLine($"{player.weapon.Sell_Price}크레딧을 획득하셨습니다");
-                            WearingWeapon(weaponList[randDrop - 1]);
+                            if (inventory.weapons.Count >= 20)
+                            {
+                                Write("장착중인 아이템이 자동판매 되었습니다. : ");
+                                player.credit += player.weapon.Sell_Price;
+                                WriteLine($"{player.weapon.Sell_Price}크레딧을 획득하셨습니다");
+                                WearingWeapon(weaponList[randDrop - 1]);
+                            }
+                            else
+                            {
+                                inventory.weapons.Add(weapon);
+                            }
                         }
                         else
                         {
-                            inventory.weapons.Add(weapon);
+                            if (inventory.weapons.Count >= 20)
+                            {
+                                Write("획득한 아이템을 판매합니다. : ");
+                                player.credit += weaponList[randDrop - 1].Sell_Price;
+                                WriteLine($"{weaponList[randDrop - 1].Sell_Price} 크레딧을 획득하셨습니다");
+                            }
+                            else
+                            {
+                                inventory.weapons.Add(weaponList[randDrop - 1]);
+                            }
                         }
                     }
-                    else
+                }
+                else
+                {
+                    randDrop = reWard.Next(0, enemy.droptable.GItem_Number.Length);
+                    randDrop = enemy.droptable.GItem_Number[randDrop];
+                    Console.WriteLine("아이템을 획득하셨습니다. : {0}", gearList[randDrop - 1].g_Name);
+                    for (int i = 0; i < player.gears.Count; i++)
                     {
-                        if (inventory.weapons.Count >= 20)
+                        if (player.gears[i].type == gearList[randDrop - 1].type)
                         {
-                            Write("획득한 아이템을 판매합니다. : ");
-                            player.credit += weaponList[randDrop - 1].Sell_Price;
-                            WriteLine($"{weaponList[randDrop - 1].Sell_Price} 크레딧을 획득하셨습니다");
-                        }
-                        else
-                        {
-                            inventory.weapons.Add(weaponList[randDrop - 1]);
+                            if (player.gears[i].defense < gearList[randDrop - 1].defense)
+                            {
+                                if (inventory.gears.Count >= 40)
+                                {
+                                    Write("장착중인 아이템이 자동판매 되었습니다. : ");
+                                    credit += gears[i].sell_Price;
+                                    WriteLine($"{gears[i].sell_Price}크레딧을 획득하셨습니다");
+                                    WearingGear(gearList[randDrop - 1], i);
+                                }
+                                else
+                                {
+                                    inventory.gears.Add(gears[i]);
+                                    WearingGear(gearList[randDrop - 1], i);
+                                }
+                            }
+                            else
+                            {
+                                if (inventory.gears.Count >= 40)
+                                {
+                                    Write("획득한 아이템을 판매합니다. : ");
+                                    credit += gearList[randDrop - 1].sell_Price;
+                                    WriteLine($"{gearList[randDrop - 1].sell_Price} 크레딧을 획득하셨습니다");
+                                }
+                                else
+                                {
+                                    inventory.gears.Add(gearList[randDrop]);
+                                }
+                            }
                         }
                     }
                 }

@@ -20,8 +20,8 @@ class Weapon
     public Weapon()
     {
         this.Damage = 0;
-        this.Weapon_Type = "";
-        this.Item_Name = null;
+        this.Weapon_Type = "미착용";
+        this.Item_Name = "미착용";
         this.Sell_Price = 0;
         this.Item_Number = 0;
     }

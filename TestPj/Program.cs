@@ -31,7 +31,7 @@ using static System.Console;
 // 데이터시트 추가
 // 몬스터 테이블추가
 // 무기 데이터 추가
-//스킬 데이터 추가
+// 스킬 데이터 추가
 // 드랍테이블 추가
 // - 입출력 부분 한 곳에 묶어서 정리(받아오는 데이터 : 몬스터, 드랍, 무기정보, 스킬, (가능하면 몬스터, 무기 데이터 추가))
 // - Player, Enemy클래스 겹치는부분 Character클래스 생성 및 상속
@@ -41,10 +41,9 @@ using static System.Console;
 // 시련의 탑 보상내용(5층 마다 보상으로 나갈 무기 데이터 추가)
 // 현재까지 구현된 내용
 // =================================================================================================
-// (가능하면) 장비아이템과 장비창 추가 Gear 클래스를 만들어 방어구를 추가함 4종(Head, Defense, Glove,Shoes)
-//            플레이어와 몬스터에게 방어력 구현, 특정 방어구의 세트옵션을 구현
-// (가능하면) 잡화상점, 장비상점 구현
-// (가능하면) 맵을 추가하여 맵형식으로 이동
+//            플레이어와 몬스터에게 방어력 처리, 특정 방어구의 세트옵션을 구현
+// (가능하면) 소비템 추가, 잡화상점 추가
+// (가능하면) 강화 기능 추가
 // (가능하면) 저장된 플레이어 데이터를 들고와 배틀페이즈 실행 (PvP)
 // (가능하면) For The King 형식의 선턴(행동주기 설정)추가
 // (추가사항) 몬스터리스트 필드클래스를 만들어 분할 
@@ -94,7 +93,7 @@ namespace TestCode
             return reData;
         }
         // 플레이어의 로그인을 처리하는 메소드
-        public static Player PlayerLogin(List<Player> playerData, List<Weapon> weaponList, Player player)
+        public static Player PlayerLogin(List<Player> playerData, List<Weapon> weaponList, List<Gear> gearList, Player player)
         {
             int inputnum;
             while (true)
@@ -107,12 +106,29 @@ namespace TestCode
                     {
                         WriteLine("저장된 정보를 로드합니다.");
                         player = new Player(playerData[i].Name, playerData[i].Exp, playerData[i].Lv,
-                                            playerData[i].Posion, playerData[i].Credit, playerData[i].Weapon_Number, playerData[i].ItemInventory);
+                                            playerData[i].Posion, playerData[i].Credit, playerData[i].Weapon_Number, playerData[i].Gear_Number, playerData[i].ItemInventory, playerData[i].GearInventory);
                         if (player.weapon_Number != 0)          // 저장된 플레이어 데이터에 무기착용 여부를 확인합니다.
                         {
                             player.weapon = new Weapon(); 
                             player.weapon = weaponList[playerData[i].Weapon_Number - 1];
                             player.WearingWeapon(weaponList[playerData[i].Weapon_Number - 1]);
+                        }
+                        if (player.gear_Number.Length != 0)
+                        {
+                            for (i = 0; i < player.gears.Count; i++)
+                            {
+                                if (player.gear_Number[i] == 0)
+                                {
+                                    player.gears[i] = new Gear();
+                                }
+                                else
+                                {
+                                    player.gears[i] = (new Gear(gearList[player.gear_Number[i] - 1].g_Name, gearList[player.gear_Number[i] - 1].defense, gearList[player.gear_Number[i] - 1].sell_Price,
+                                                              gearList[player.gear_Number[i] - 1].type, gearList[player.gear_Number[i] - 1].grade, gearList[player.gear_Number[i] - 1].gItem_Number));
+                                    player.defense += gearList[player.gear_Number[i] - 1].defense;
+                                }
+                            }
+                            player.IsWearingGear();
                         }
                         return player;
                     }
@@ -125,6 +141,15 @@ namespace TestCode
                         if (inputnum == 1)
                         {
                             player = new Player(input);
+                            player.weapon = new Weapon();
+                            for (int i = 0; i < 4; i++)
+                            {
+                                player.gears[i] = new Gear();
+                            }
+                            player.gears[0].type = "Head";
+                            player.gears[1].type = "Armor";
+                            player.gears[2].type = "Glove";
+                            player.gears[3].type = "Shoes";
                             return player;
                         }
                         else if (inputnum == 2)
@@ -161,7 +186,12 @@ namespace TestCode
                     playerData[i].Posion = player.posion;
                     playerData[i].Credit = player.credit;
                     playerData[i].Weapon_Number = player.weapon_Number;
+                    playerData[i].gear_Number[0] = player.gear_Number[0];
+                    playerData[i].gear_Number[1] = player.gear_Number[1];
+                    playerData[i].gear_Number[2] = player.gear_Number[2];
+                    playerData[i].gear_Number[3] = player.gear_Number[3];
                     playerData[i].ItemInventory = player.inventory.GetInventory();
+                    playerData[i].gearInventory = player.inventory.GetGearInventory();
                     playerSave = true;
                 }
             }
@@ -174,7 +204,12 @@ namespace TestCode
                 playerData[playerData.Count - 1].Posion = player.posion;
                 playerData[playerData.Count - 1].Credit = player.credit;
                 playerData[playerData.Count - 1].Weapon_Number = player.weapon_Number;
+                playerData[playerData.Count - 1].gear_Number[0] = player.gear_Number[0];
+                playerData[playerData.Count - 1].gear_Number[1] = player.gear_Number[1];
+                playerData[playerData.Count - 1].gear_Number[2] = player.gear_Number[2];
+                playerData[playerData.Count - 1].gear_Number[3] = player.gear_Number[3];
                 playerData[playerData.Count - 1].ItemInventory = player.inventory.GetInventory();
+                playerData[playerData.Count - 1].gearInventory = player.inventory.GetGearInventory();
                 playerSave = true;
             }
             string save = JsonSerializer.Serialize(playerData);
@@ -183,14 +218,12 @@ namespace TestCode
             return;
         }            
          // 배틀페이즈 처리
-        public static void BattlePhase(List<Weapon> weaponList,Enemy enemy, Player player)
+        public static void BattlePhase(List<Weapon> weaponList, List<Gear> gearList, Enemy enemy, Player player)
         {
             Random critical = new Random();         // 치명타적용을 위한 변수선언
             int value;
             float skillDamage;
-            WriteLine("------------------------------------------------------------------------");
             enemy.ShowInfo();
-            WriteLine("------------------------------------------------------------------------");
             while (true)
             {
                 if (player.playerTurn == true)
@@ -242,7 +275,7 @@ namespace TestCode
                         }
                         else if (value == 3)                // 스킬사용
                         {
-                            if (player.weapon != null)      // 플레이어가 무기를 들고있는지 체크합니다.
+                            if (player.weapon.Item_Name != "미착용")      // 플레이어가 무기를 들고있는지 체크합니다.
                             {
                                 if (player.mp >= 20)        // 플레이어가 최소한의 스킬을 사용할 수 있는지 체크합니다.
                                 {
@@ -329,7 +362,14 @@ namespace TestCode
                     }
                     if (player.mp <= player.maxMp)          // 플레이어의 턴이 끝날때 10의 마나를 회복합니다.
                     {
-                        player.mp += 10;
+                        if (player.maxMp > player.mp + 10)
+                        {
+                            player.mp += 10;
+                        }
+                        else
+                        {
+                            player.mp = player.maxMp;
+                        }
                     }
                     if (player.hitStun == true)             // 플레이어가 스킬을 사용하여 몬스터에게 기절효과가 들어갔는지 체크합니다.
                     {
@@ -421,9 +461,7 @@ namespace TestCode
                 }
                 if (enemy.hp <= 0 || player.IsAlive() == false)
                 {
-                    WriteLine("------------------------------------------------------------------------");
                     player.ShowInfo();
-                    WriteLine("------------------------------------------------------------------------");
                     WriteLine("\n전투종료");
                     player.deBurfCount = 0;
                     enemy.deBurfCount = 0;
@@ -441,7 +479,7 @@ namespace TestCode
                         if (enemy.type != "보스")
                         {
 
-                            player.Reward(enemy, player, weaponList);
+                            player.Reward(enemy, player, weaponList, gearList);
                         }
                         player.mp = 0;
                         enemy.hp = enemy.maxHp;
@@ -467,27 +505,25 @@ namespace TestCode
         // 지역이동을 처리하는 메소드
         public static void FieldMove(List<Enemy> praList, List<Enemy> seaList, List<Enemy> caveList
                                    , List<Enemy> deep_CaveList, List<Enemy> bossList
-                                   , Player player, List<Weapon> weaponList)
+                                   , Player player, List<Weapon> weaponList, List<Gear> gearList)
         {
             int lotation = 0;
             int killCount = 0;
             int bossChoice = 0;
             while (true)
             {
-                WriteLine("------------------------------------------------------------------------");
                 player.ShowInfo();
-                WriteLine("------------------------------------------------------------------------");
                 Write("\n전투를 진행할 지역을 선택해주세요 1. 초원 2. 바다 3. 동굴 4. 시련의 탑 5. 이전 ");
                 if (int.TryParse(ReadLine(), out lotation))
                 {
                     int respon = new Random().Next(1, 100);   // 지역몹을 랜덤하게 리스폰하기위한 변수
                     if (lotation == 1)                                                                  // 전투지역
                     {
-                        BattlePhase(weaponList, praList[respon % praList.Count], player);
+                        BattlePhase(weaponList, gearList, praList[respon % praList.Count], player);
                     }
                     else if (lotation == 2)                                                             // 전투지역
                     {
-                        BattlePhase(weaponList, seaList[respon % seaList.Count], player);
+                        BattlePhase(weaponList, gearList, seaList[respon % seaList.Count], player);
                     }
                     else if (lotation == 3)                                                             // 전투지역
                     {
@@ -496,11 +532,11 @@ namespace TestCode
                         {
                             if (lotation == 1)
                             {
-                                BattlePhase(weaponList, caveList[respon % caveList.Count], player);
+                                BattlePhase(weaponList, gearList, caveList[respon % caveList.Count], player);
                             }
                             else if (lotation == 2)
                             {
-                                BattlePhase(weaponList, deep_CaveList[respon % deep_CaveList.Count], player);
+                                BattlePhase(weaponList, gearList, deep_CaveList[respon % deep_CaveList.Count], player);
                             }
                             else
                             {
@@ -523,16 +559,17 @@ namespace TestCode
                         {
                             if (killCount < 15)
                             {
-                                int swap = rand.Next(0, 2);
+                                int swap = rand.Next(0, 3)%3;
                                 Dummy = new Enemy(bossList[swap].damage, bossList[swap].name, bossList[swap].maxHp, 
                                                   bossList[swap].maxMp, bossList[swap].exp, bossList[swap].type);
+                                Dummy.skill = bossList[swap].skill;
                                 for (int i = 0; i <= killCount; i++)
                                 {
                                     Dummy.maxHp += (int)Dummy.maxHp / 20;
                                     Dummy.hp = Dummy.maxHp;
                                     Dummy.damage += (int)Dummy.damage / 20;
                                 }
-                                BattlePhase(weaponList, Dummy, player);
+                                BattlePhase(weaponList, gearList, Dummy, player);
                                 if (player.IsAlive() == false)
                                 {
                                     player.Dead();
@@ -551,24 +588,36 @@ namespace TestCode
                                     {
                                         bossChoice = 3;
                                         Dummy = bossList[3];
-                                        BattlePhase(weaponList, Dummy, player);
+                                        BattlePhase(weaponList, gearList, Dummy, player);
                                     }
                                     else if (index == 2)
                                     {
                                         bossChoice = 4;
                                         Dummy = bossList[4];
-                                        BattlePhase(weaponList, Dummy, player);
+                                        BattlePhase(weaponList, gearList, Dummy, player);
                                     }
                                     else if (index == 3)
                                     {
                                         bossChoice = 5;
                                         Dummy = bossList[5];
-                                        BattlePhase(weaponList, Dummy, player);
+                                        BattlePhase(weaponList, gearList, Dummy, player);
                                     }
                                     else
                                     {
                                         WriteLine("잘못입력했습니다 다시입력해주세요");
                                     }
+                                    if (player.IsAlive() == false)
+                                    {
+                                        player.Dead();
+                                        player.InTower = false;
+                                        killCount--;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        player.InTower = false;
+                                        break;
+                                    }    
                                 }
                                 else
                                 {
@@ -586,17 +635,17 @@ namespace TestCode
                             if (killCount > 5 && killCount < 10)
                             {
                                 // 도전자무기 Ⅰ
-                                player.Reward(bossList[0], player, weaponList);
+                                player.Reward(bossList[0], player, weaponList, gearList);
                             }
                             else if (killCount >= 10 && killCount < 15)
                             {
                                 // 도전자무기 Ⅱ
-                                player.Reward(bossList[1], player, weaponList);
+                                player.Reward(bossList[1], player, weaponList, gearList);
                             }
                             else if( killCount == 15)
                             {
                                 WriteLine("최종보상을 획득하셨습니다.");
-                                player.Reward(bossList[bossChoice], player, weaponList);
+                                player.Reward(bossList[bossChoice], player, weaponList, gearList);
                             }
                             WriteLine($"{reWardCredit} 크레딧을 획득하셨습니다.");
                             player.credit += reWardCredit;
@@ -626,22 +675,18 @@ namespace TestCode
             WriteLine("------------------------------------------------------------------------");
             while (true)
             {
-                WriteLine("하고자 하는 행동을 선택해주세요 1. 지역이동, 2. 포션구입(포션의 가격은 {0}원 입니다.)", (20 * (player.lv + 1)));
+                WriteLine("하고자 하는 행동을 선택해주세요 1. 포션구입(포션의 가격은 {0}원 입니다.), 2. 이전 ", (10 * (player.lv + 1)));
                 if (int.TryParse(ReadLine(), out state))
                 {
 
-                    if (state == 1)
-                    {
-                        return;
-                    }
-                    else if (state == 2 && player.posion < (10 + player.lv))
+                    if (state == 1 && player.posion < (10 + player.lv))
                     {
                         // 포션구입
                         if (20 * (player.lv + 1) < player.credit)
                         {
                             WriteLine("포션을 구입했습니다.");
                             player.posion = player.posion + 1;
-                            player.credit = player.credit - (20 * (player.lv + 1));
+                            player.credit = player.credit - (10 * (player.lv + 1));
                             WriteLine("포션은 최대 {0}개 가질 수 있습니다.", (10 + player.lv) - 1);
                             player.ShowInfo();
                         }
@@ -650,9 +695,13 @@ namespace TestCode
                             WriteLine("돈이 부족합니다..");
                         }
                     }
-                    else if (state == 2 && player.posion >= (10 + player.lv))
+                    else if (state == 1 && player.posion >= (10 + player.lv))
                     {
                         WriteLine("포션의 개수가 너무 많습니다.");
+                    }
+                    else if (state == 2)
+                    {
+                        return;
                     }
                     else
                     {
@@ -674,21 +723,28 @@ namespace TestCode
             DataSheet<Enemy> e_DataSheet = new DataSheet<Enemy>();
             DataSheet<Weapon> w_DataSheet = new DataSheet<Weapon>();
             DataSheet<Skill> s_DataSheet = new DataSheet<Skill>();
+            DataSheet<GearData> g_DataSheet = new DataSheet<GearData>();
             List<Skill> skillList = s_DataSheet.DataIn("SkillDataTest");
             List<DropTable> drop = dropTable.DataIn("DropTest");
-
             List<Player> playerList = p_DataSheet.DataIn("PlayerSave");
             List<Enemy> enemies = e_DataSheet.DataIn("MonsterTest");
             List<Weapon> weapons = w_DataSheet.DataIn("WeaponTypeTest");
+            List<GearData> gearData = g_DataSheet.DataIn("GearTestData");
+            List<Gear> gearList = new List<Gear>();
             List<Enemy> praList = new List<Enemy>();
             List<Enemy> seaList = new List<Enemy>();
             List<Enemy> caveList = new List<Enemy>();
             List<Enemy> deep_CaveList = new List<Enemy>();
             List<Enemy> bossList = new List<Enemy>();
             List<Enemy> forestList = new List<Enemy>();
+            for(int i = 0; i < gearData.Count; i++)
+            {
+                gearList.Add(new Gear(gearData[i].G_Name, gearData[i].Defense, gearData[i].Sell_Price, gearData[i].Type, gearData[i].Grade, gearData[i].GItem_Number));
+            }
 
+            #region 플레이어 생성, 로드
             Player player = new Player();
-            player = PlayerLogin(playerList, weapons, player);
+            player = PlayerLogin(playerList, weapons, gearList, player);
             player.inventory = new Inventory();
             if (player.itemInventory != null)
             {
@@ -696,13 +752,23 @@ namespace TestCode
                 {
                     player.inventory.weapons.Add(weapons[player.itemInventory[i] - 1]);
                 }
+                for(int i = 0; i < player.gearInventory.Length; i++)
+                {
+                    player.inventory.gears.Add(gearList[player.gearInventory[i] - 1]);
+                }
             }
+            #endregion
+
+            #region 몬스터데이터 필드별로 분할
             praList = Divide(enemies, drop, "초원");
             seaList = Divide(enemies, drop, "바다");
             caveList = Divide(enemies, drop, "동굴(초입)");
             deep_CaveList = Divide(enemies, drop, "동굴(심층)");
             bossList = Divide(enemies, drop, "보스");
             forestList = Divide(enemies, drop, "죽음의숲");
+            #endregion
+
+            #region 몬스터, 플레이어 스킬할당
             player.skill = new List<Skill>();
             for (int i = 0; i < skillList.Count; i++)
             {
@@ -723,36 +789,65 @@ namespace TestCode
                     }
                 }
             }
+            #endregion
             int lotation = 0;
             while (true)
             {
-                WriteLine("------------------------------------------------------------------------");
                 player.ShowInfo();
-                WriteLine("------------------------------------------------------------------------");
-                WriteLine("하고자 하는 행동을 선택해주세요 1. 인벤토리, 2. 지역이동, 3. 마을, 4. 세이브/종료");
+                WriteLine("하고자 하는 행동을 선택해주세요 1. 인벤토리, 2. 장비창, 3. 지역이동, 4. 마을, 5. 세이브/종료");
                 if (int.TryParse(ReadLine(), out lotation))
                 {
                     if (lotation == 1)                                                            // 인벤토리
                     {
-                        if (player.inventory != null)
+                        int index;
+                        WriteLine("1. 무기창, 2. 방어구");
+                        index = int.Parse(ReadLine());
+                        if (index == 1)
                         {
-                            player.inventory.InventoryInfo(player);
+                            if (player.inventory != null)
+                            {
+                                player.inventory.InventoryWeaponInfo(player);
+                            }
+                            else
+                            {
+                                Console.WriteLine("아이템이 없습니다.");
+                            }
+                        }
+                        if (index == 2)
+                        {
+                            if (player.inventory != null)
+                            {
+                                player.inventory.InventoryGearInfo(player);
+                            }
+                            else
+                            {
+                                Console.WriteLine("아이템이 없습니다.");
+                            }
                         }
                         else
                         {
-                            Console.WriteLine("아이템이 없습니다.");
+                            continue;
                         }
                     }
-                    else if (lotation == 2)
+                    else if(lotation == 2)
                     {
-                        FieldMove(praList, seaList, caveList, deep_CaveList, bossList
-                                , player, weapons);
+                        Console.WriteLine($"------------------------------------------------------------------------\n      " +
+                            $"착용무기      : {player.weapon.Item_Name}\n------------------------------------------------------------------------\n\t" +
+                            $"모자        : {player.gears[0].g_Name}\n------------------------------------------------------------------------\n\t" +
+                            $"갑옷        : {player.gears[1].g_Name}\n------------------------------------------------------------------------\n\t" +
+                            $"장갑        : {player.gears[2].g_Name}\n------------------------------------------------------------------------\n\t" +
+                            $"신발        : {player.gears[3].g_Name}\n------------------------------------------------------------------------\n 추가행동(미구현)");
                     }
                     else if (lotation == 3)
                     {
-                        Town(player);
+                        FieldMove(praList, seaList, caveList, deep_CaveList, bossList
+                                , player, weapons, gearList);
                     }
                     else if (lotation == 4)
+                    {
+                        Town(player);
+                    }
+                    else if (lotation == 5)
                     {
                         PlayerLogout(playerList, player, "PlayerSave");
                         return;

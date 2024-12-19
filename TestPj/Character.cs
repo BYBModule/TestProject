@@ -24,9 +24,11 @@ class Character
 
     public virtual void ShowInfo()      // 정보 출력 메소드
     {
+        Console.WriteLine("------------------------------------------------------------------------");
         Console.WriteLine("{0}\nDamage : {1}\nHp : {2}/{3}\nMp : {4}/{5}\nExp : {6}", this.name, this.damage, this.hp,
                                                                    this.maxHp, this.mp,
                                                                      this.maxMp, this.exp);
+        Console.WriteLine("------------------------------------------------------------------------");
     }
     public virtual bool IsAlive()       // 캐릭터 개체의 생존여부를 확인하기위한 메소드
     {
