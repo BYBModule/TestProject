@@ -5,16 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 class Enemy : Character
 {
-    public string type;             // 몬스터의 타입
-    public DropTable droptable;     // 몬스터의 드랍테이블
-    public List<Skill> skill;       // 보스가 사용할 스킬을 저장
-    public int Damage { get; set; } // 외부 데이터에서 데미지값을 받기위한 프로퍼티  
-    public int MaxHp { get; set; }  // 외부 데이터에서 최대체력값을 받기위한 프로퍼티
-    public int MaxMp { get; set; }  // 외부 데이터에서 최대마나값을 받기위한 프로퍼티
-    public int Exp { get; set; }    // 외부 데이터에서 몬스터의 경험치를 받기위한 프로퍼티
-    public int Defense {  get; set; }// 외부 데이터에서 몬스터의 방어력을 받기위한 프로퍼티
-    public string Name { get; set; }// 외부 데이터에서 몬스터의 이름을 받기위한 프로퍼티
-    public string Type { get; set; }// 외부에서 몬스터의 타입을 받기위한 프로퍼티
+    public string type;                 // 몬스터의 타입
+    public DropTable droptable;         // 몬스터의 드랍테이블
+    public List<Skill> skill;           // 보스가 사용할 스킬을 저장
+    public int Damage { get; set; }     // 외부 데이터에서 데미지값을 받기위한 프로퍼티  
+    public int MaxHp { get; set; }      // 외부 데이터에서 최대체력값을 받기위한 프로퍼티
+    public int MaxMp { get; set; }      // 외부 데이터에서 최대마나값을 받기위한 프로퍼티
+    public int Exp { get; set; }        // 외부 데이터에서 몬스터의 경험치를 받기위한 프로퍼티
+    public int Defense {  get; set; }   // 외부 데이터에서 몬스터의 방어력을 받기위한 프로퍼티
+    public string Name { get; set; }    // 외부 데이터에서 몬스터의 이름을 받기위한 프로퍼티
+    public string Type { get; set; }    // 외부에서 몬스터의 타입을 받기위한 프로퍼티
 
     public Enemy()
     {

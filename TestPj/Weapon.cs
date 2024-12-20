@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 class Weapon
 {
-    public int Damage { get; set; }                 // 무기공격력(프로퍼티)
-    public string Weapon_Type { get; set; }         // 아이템 타입(프로퍼티)
-    public string Item_Name { get; set; }           // 아이템 이름(프로퍼티)
-    public int Sell_Price { get; set; }             // 판매가격(프로퍼티)
-    public int Item_Number { get; set; }            // 아이템 고유번호(프로퍼티)
-    //private int damage;                              // 무기공격력
-    //private string weapon_Type;                      // 아이템 타입
-    //private string item_Name;                        // 아이템 이름
-    //private int sell_Price;                          // 판매가격
-    //private int itemNumber;                          // 아이템 고유번호
+    public int Damage { get; set; }                     // 무기공격력(프로퍼티)
+    public string Weapon_Type { get; set; }             // 아이템 타입(프로퍼티)
+    public string Item_Name { get; set; }               // 아이템 이름(프로퍼티)
+    public int Sell_Price { get; set; }                 // 판매가격(프로퍼티)
+    public int Item_Number { get; set; }                // 아이템 고유번호(프로퍼티)
+    // private int damage;                              // 무기공격력
+    // private string weapon_Type;                      // 아이템 타입
+    // private string item_Name;                        // 아이템 이름
+    // private int sell_Price;                          // 판매가격
+    // private int itemNumber;                          // 아이템 고유번호
 
     public Weapon()
     {

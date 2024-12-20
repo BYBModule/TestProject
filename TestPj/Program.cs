@@ -4,9 +4,9 @@ using System.Numerics;
 using System.Text.Json;
 using static System.Console;
 // 레벨에 따라 최대 Hp, Mp, 공격력을 증가시키고 필요 경험치를 증가시킵니다.
-// 플레이어의 행동은 공격, 포션사용, 도망                (0, 1, 2)  
-// 무기는 3종류로 설정(검, 활, 스태프)                   (0, 1, 2)
-// 지역은 마을, 초원, 동굴, 협곡, 바다
+// 플레이어의 행동은 공격, 포션사용, 스킬사용, 도망       
+// 무기는 3종류로 설정(검, 활, 스태프)                         
+// 지역은 마을, 초원, 바다, 동굴, 숲, 탑  
 // 플레이어가 사망할 시 가지고 있는 경험치의 10%를 잃습니다.
 // 경험치 획득방식/전투 > 적의 exp만큼 플레이어 exp증가 > 플레이어exp가 Max exp 달성시 플레이어 Lv을 1올리고
 // 초과한 만큼 플레이어 exp를 증가시킴
@@ -48,6 +48,7 @@ using static System.Console;
 // (가능하면) 저장된 플레이어 데이터를 들고와 배틀페이즈 실행 (PvP)
 // (가능하면) For The King 형식의 선턴(행동주기 설정)추가
 // (추가사항) 몬스터리스트 필드클래스를 만들어 분할 
+// 
 namespace TestCode
 {
     internal class Program
@@ -55,6 +56,7 @@ namespace TestCode
         // json 파일로 저장된 데이터시트를 불러오기위한 제너릭클래스
         class DataSheet<T>   
         {
+            // 제너럴타입으로 데이터를 받아 파일을 읽는 작업을 하기위한 메소드
             public List<T> DataIn(string dataSheet)
             {
                 StreamReader DataTable = new StreamReader($"./{dataSheet}.json");           //.json 파일의 데이터를 읽습니다.
@@ -70,7 +72,7 @@ namespace TestCode
                 return reData;
             }
         }
-         // 몬스터데이터를 타입에따라 분할하고 드랍테이블을 설정합니다.
+        // 몬스터데이터를 타입에따라 분할하고 드랍테이블을 설정합니다.
         public static List<Enemy> Divide(List<Enemy> list, List<DropTable> drop, string Type)                   
         {
             List<Enemy> reData = new List<Enemy>();
@@ -214,8 +216,8 @@ namespace TestCode
             sw.Write(save);                                                         // 파일 쓰기
             sw.Close();                                                             // 파일 닫기
             return;
-        }            
-         // 배틀페이즈 처리
+        }                    
+        // 배틀페이즈 처리
         public static void BattlePhase(List<Weapon> weaponList, List<Gear> gearList, Enemy enemy, Player player)
         {
             Random critical = new Random();         // 치명타적용을 위한 변수선언
@@ -643,7 +645,7 @@ namespace TestCode
                         {
                             WriteLine($"총 {killCount} 층 올라가셨습니다.");
                             WriteLine("보상내용");
-                            if (killCount > 5 && killCount < 10)
+                            if (killCount >= 5 && killCount < 10)
                             {
                                 // 도전자무기 Ⅰ
                                 player.Reward(bossList[0], player, weaponList, gearList);
@@ -729,37 +731,38 @@ namespace TestCode
         // 인게임 메소드
         public static void Ingame()
         {
-            DataSheet<DropTable> dropTable = new DataSheet<DropTable>();
-            DataSheet<Player> p_DataSheet = new DataSheet<Player>();
-            DataSheet<Enemy> e_DataSheet = new DataSheet<Enemy>();
-            DataSheet<Weapon> w_DataSheet = new DataSheet<Weapon>();
-            DataSheet<Skill> s_DataSheet = new DataSheet<Skill>();
-            DataSheet<GearData> g_DataSheet = new DataSheet<GearData>();
-            List<Skill> skillList = s_DataSheet.DataIn("SkillDataTest");
-            List<DropTable> drop = dropTable.DataIn("DropTest");
-            List<Player> playerList = p_DataSheet.DataIn("PlayerSave");
-            List<Enemy> enemies = e_DataSheet.DataIn("MonsterTest");
-            List<Weapon> weapons = w_DataSheet.DataIn("WeaponTypeTest");
-            List<GearData> gearData = g_DataSheet.DataIn("GearTestData");
-            List<Gear> gearList = new List<Gear>();
-            List<Enemy> praList = new List<Enemy>();
-            List<Enemy> seaList = new List<Enemy>();
-            List<Enemy> caveList = new List<Enemy>();
-            List<Enemy> deep_CaveList = new List<Enemy>();
-            List<Enemy> bossList = new List<Enemy>();
-            List<Enemy> forestList = new List<Enemy>();
-            for(int i = 0; i < gearData.Count; i++)
+            DataSheet<DropTable> dropTable = new DataSheet<DropTable>();    
+            DataSheet<Player> p_DataSheet = new DataSheet<Player>();        
+            DataSheet<Enemy> e_DataSheet = new DataSheet<Enemy>();          
+            DataSheet<Weapon> w_DataSheet = new DataSheet<Weapon>();        
+            DataSheet<Skill> s_DataSheet = new DataSheet<Skill>();          
+            DataSheet<GearData> g_DataSheet = new DataSheet<GearData>();    
+            List<Skill> skillList = s_DataSheet.DataIn("SkillDataTest");    // SkillDataTest.json
+            List<DropTable> drop = dropTable.DataIn("DropTest");            // DropTest.json
+            List<Player> playerList = p_DataSheet.DataIn("PlayerSave");     // PlayerSave.json
+            List<Enemy> enemies = e_DataSheet.DataIn("MonsterTest");        // MonsterTest.json
+            List<Weapon> weapons = w_DataSheet.DataIn("WeaponTypeTest");    // WeaponTypeTest.json
+            List<GearData> gearData = g_DataSheet.DataIn("GearTestData");   // GearTestData.json
+            List<Gear> gearList = new List<Gear>();                         // 방어구 리스트
+            List<Enemy> praList = new List<Enemy>();                        // 초원에서 리젠될 몬스터리스트
+            List<Enemy> seaList = new List<Enemy>();                        // 바다에서 리젠될 몬스터리스트
+            List<Enemy> caveList = new List<Enemy>();                       // 동굴에서 리젠될 몬스터리스트
+            List<Enemy> deep_CaveList = new List<Enemy>();                  // 동굴(심층)에서 리젠될 몬스터리스트
+            List<Enemy> bossList = new List<Enemy>();                       // 보스몬스터 리스트
+            List<Enemy> forestList = new List<Enemy>();                     // 죽음의 숲에서 리젠될 몬스터리스트
+            for(int i = 0; i < gearData.Count; i++)                         
             {
                 gearList.Add(new Gear(gearData[i].G_Name, gearData[i].Defense, gearData[i].Sell_Price, gearData[i].Type, gearData[i].Grade, gearData[i].GItem_Number));
             }
-
+            // 플레이어가 생성되기 전 플레이어에 할당되어야 하는 무기 데이터 리스트와 방어구 데이터 리스트를 선언합니다.
             #region 플레이어 생성, 로드
-            Player player = new Player();
-            player = PlayerLogin(playerList, weapons, gearList, player);
-            player.inventory = new Inventory();
-            if (player.itemInventory != null)
+            Player player = new Player();                                   
+            player = PlayerLogin(playerList, weapons, gearList, player);    
+            player.inventory = new Inventory();                  
+            // 플레이어 인벤토리 할당(무기, 장비)
+            if (player.itemInventory != null)                               
             {
-                for (int i = 0; i < player.itemInventory.Length; i++)
+                for (int i = 0; i < player.itemInventory.Length; i++)       
                 {
                     player.inventory.weapons.Add(weapons[player.itemInventory[i] - 1]);
                 }

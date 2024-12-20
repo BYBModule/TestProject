@@ -8,24 +8,24 @@ using System.Threading.Tasks;
 using static System.Console;
 class Player : Character
 {
-    public int lv;                          // 플레이어의 레벨을 저장할 변수
-    public int posion;                      // 플레이어가 소지하고 있는 포션의 개수
-    public int maxExp;                      // 다음 레벨로 가기위한 경험치
-    public bool wearing_Weapon = false;     // 아이템 착용 유무
-    public int weapon_Number;               // 착용중인 무기의 고유번호
-    public int[] gear_Number = new int[4];  // 착용중인 방어구의 고유번호
-    public Weapon weapon = new Weapon();    // 착용중인 무기의 데이터를 저장할 변수
-    public int[] itemInventory;             // 인벤토리에 무기의 고유값을 저장하기 위한 배열
-    public int[] gearInventory;             // 인벤토리에 방어구의 고유값을 저장하기 위한 배열
-    //public Weapon Weapon { get; set; }    // 플레이어 무기 데이터값을 가져오기 위한 프로퍼티
-    public Inventory inventory;             // 플레이어의 인벤토리
-    public int credit = 0;                  // 플레이어의 크레딧
-    public List<Skill> skill;               // 사용할 스킬의 리스트
-    public bool playerTurn = true;          // 플레이어의 턴
-    public bool InTower = false;            // 타워 입장 유무
-    public string setOption;                // 세트옵션의 이름을 저장합니다.
-    private bool setOn;                     // 장비 세트옵션이 켜져있는지 확인합니다.
-    public List<Gear> gears = new List<Gear>(new Gear[4]);
+    public int lv;                              // 플레이어의 레벨을 저장할 변수
+    public int posion;                          // 플레이어가 소지하고 있는 포션의 개수
+    public int maxExp;                          // 다음 레벨로 가기위한 경험치
+    public bool wearing_Weapon = false;         // 아이템 착용 유무
+    public int weapon_Number;                   // 착용중인 무기의 고유번호
+    public int[] gear_Number = new int[4];      // 착용중인 방어구의 고유번호
+    public Weapon weapon = new Weapon();        // 착용중인 무기의 데이터를 저장할 변수
+    public int[] itemInventory;                 // 인벤토리에 무기의 고유값을 저장하기 위한 배열
+    public int[] gearInventory;                 // 인벤토리에 방어구의 고유값을 저장하기 위한 배열
+    //public Weapon Weapon { get; set; }        // 플레이어 무기 데이터값을 가져오기 위한 프로퍼티
+    public Inventory inventory;                 // 플레이어의 인벤토리
+    public int credit = 0;                      // 플레이어의 크레딧
+    public List<Skill> skill;                   // 사용할 스킬의 리스트
+    public bool playerTurn = true;              // 플레이어의 턴
+    public bool InTower = false;                // 타워 입장 유무
+    public string setOption;                    // 세트옵션의 이름을 저장합니다.
+    private bool setOn;                         // 장비 세트옵션이 켜져있는지 확인합니다.
+    public List<Gear> gears = new List<Gear>(new Gear[4]);  //  모자 갑옷 장갑 신발
 
     // 외부에서 플레이어데이터를 가져오고 저장하기위한 프로퍼티
     public string Name { get; set; }        
@@ -794,27 +794,27 @@ class Player : Character
         {
             if (setOption == "Atlantis")
             {
-                Console.Write("\n아틀란티스");
+                Console.Write("아틀란티스");
             }
             else if (setOption == "Challenge")
             {
-                Console.Write("\n도전자");
+                Console.Write("도전자");
             }
             else if (setOption == "ForestKeeper")
             {
-                Console.Write("\n죽은숲의 숲지기");
+                Console.Write("죽은숲의 숲지기");
             }
             else if (setOption == "DeathKnight")
             {
-                Console.Write("\n죽음의 기사");
+                Console.Write("죽음의 기사");
             }
             else if (setOption == "Sylphid")
             {
-                Console.Write("\n바람과 함께하는 자");
+                Console.Write("바람과 함께하는 자");
             }
             else if (setOption == "DemonLord")
             {
-                Console.Write("\n영원한 지배자");
+                Console.Write("영원한 지배자");
             }
         }
         else

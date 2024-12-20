@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 class Inventory
 {
-    public static int weaponCount = 0;                  // 현재 인벤토리에 저장된 무기를 받기위한 변수
-    public static int gearCount = 0;                    // 현재 인벤토리에 저장된 방어구를 받기위한 변수
-    public List<Weapon> weapons = new List<Weapon>();   // 인벤토리에 저장된 무기의 리스트
-    public List<Gear> gears = new List<Gear>();         // 인벤토리에 저장된 방어구의 리스트
+    public static int weaponCount = 0;                      // 현재 인벤토리에 저장된 무기를 받기위한 변수
+    public static int gearCount = 0;                        // 현재 인벤토리에 저장된 방어구를 받기위한 변수
+    public List<Weapon> weapons = new List<Weapon>();       // 인벤토리에 저장된 무기의 리스트
+    public List<Gear> gears = new List<Gear>();             // 인벤토리에 저장된 방어구의 리스트
     public Inventory()
     {
 
     }
-    public int[] GetInventory()                     // 인벤토리에 저장된 아이템의 배열을 받기위한 메소드
+    public int[] GetInventory()                             // 인벤토리에 저장된 아이템의 배열을 받기위한 메소드
     {
         int[] result = new int[weapons.Count];
         for (int i = 0; i < weapons.Count; i++)
@@ -24,7 +24,7 @@ class Inventory
         }
         return result;
     }
-    public int[] GetGearInventory()                 // 인벤토리에 저장된 방어구 배열을 받기위한 메소드
+    public int[] GetGearInventory()                         // 인벤토리에 저장된 방어구 배열을 받기위한 메소드
     {
         int[] result = new int[gears.Count];
         for (int i = 0; i < gears.Count; i++)
@@ -33,7 +33,7 @@ class Inventory
         }
         return result;
     }           
-    public void InventoryWeaponInfo(Player player)  // 인벤토리 정보를 처리하는 메소드
+    public void InventoryWeaponInfo(Player player)          // 인벤토리 정보를 처리하는 메소드
     {
         if (weapons.Count != 0)
         {

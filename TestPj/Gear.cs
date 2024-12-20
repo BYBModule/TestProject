@@ -8,21 +8,21 @@ using static System.Net.Mime.MediaTypeNames;
 
 class GearData
 {
-    public string G_Name { get; set; }
-    public int Defense { get; set; }
-    public int Sell_Price { get; set; }
-    public string Type { get; set; }
-    public string Grade { get; set; }
-    public int GItem_Number { get; set; }
+    public string G_Name { get; set; }              // 방어구 데이터
+    public int Defense { get; set; }                // 방어력
+    public int Sell_Price { get; set; }             // 판매가격
+    public string Type { get; set; }                // 방어구의 타입(Head, Defense, Glove, Shoes)
+    public string Grade { get; set; }               // 아이템의 세트효과
+    public int GItem_Number { get; set; }           // 방어구의 고유번호
 }
 class Gear
 {
-    public string g_Name;           // 방어구 이름
-    public int defense;             // 방어력
-    public int sell_Price;          // 판매가격         
-    public string type;             // Head, Defense, Glove, Shoes 4종(각각 리스트 0, 1, 2, 3에 할당)
-    public string grade;            // 아이템의 등급을받아 처리하는 변수
-    public int gItem_Number;        // 아이템 번호
+    public string g_Name;               // 방어구 이름
+    public int defense;                 // 방어력
+    public int sell_Price;              // 판매가격         
+    public string type;                 // Head, Defense, Glove, Shoes 4종(각각 리스트 0, 1, 2, 3에 할당)
+    public string grade;                // 아이템의 등급을받아 처리하는 변수
+    public int gItem_Number;            // 아이템 번호
 
     public Gear()
     {
